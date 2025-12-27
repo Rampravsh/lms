@@ -15,9 +15,9 @@ const Sidebar = () => {
     ];
 
     return (
-        <aside className="w-64 bg-navy-900 border-r border-navy-800 h-screen fixed left-0 top-0 flex flex-col">
+        <aside className="w-64 bg-white dark:bg-navy-900 border-r border-slate-200 dark:border-navy-800 h-screen fixed left-0 top-0 flex flex-col transition-colors duration-300">
             <div className="p-6">
-                <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+                <h1 className="text-2xl font-bold text-navy-900 dark:text-white flex items-center gap-2">
                     <span className="w-8 h-8 bg-mint-500 rounded-lg flex items-center justify-center text-navy-900 font-bold">L</span>
                     LMS
                 </h1>
@@ -33,7 +33,7 @@ const Sidebar = () => {
                                 "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group",
                                 isActive
                                     ? "bg-mint-500 text-navy-900 font-semibold shadow-lg shadow-mint-500/20"
-                                    : "text-slate-400 hover:bg-navy-800 hover:text-white"
+                                    : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-navy-800 hover:text-navy-900 dark:hover:text-white"
                             )
                         }
                     >
@@ -43,8 +43,8 @@ const Sidebar = () => {
                 ))}
             </nav>
 
-            <div className="p-4 border-t border-navy-800">
-                <button className="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-red-400 w-full hover:bg-navy-800 rounded-xl transition-colors">
+            <div className="p-4 border-t border-slate-200 dark:border-navy-800">
+                <button className="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 w-full hover:bg-slate-100 dark:hover:bg-navy-800 rounded-xl transition-colors">
                     <LogOut size={20} />
                     <span>Logout</span>
                 </button>

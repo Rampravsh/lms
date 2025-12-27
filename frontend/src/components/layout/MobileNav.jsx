@@ -13,7 +13,7 @@ const MobileNav = () => {
     ];
 
     return (
-        <div className="fixed bottom-0 left-0 w-full bg-navy-900 border-t border-navy-800 p-2 flex justify-around items-center z-50 md:hidden pb-safe">
+        <div className="fixed bottom-0 left-0 w-full bg-white dark:bg-navy-900 border-t border-slate-200 dark:border-navy-800 p-2 flex justify-around items-center z-50 md:hidden pb-safe transition-colors duration-300">
             {navItems.map((item) => (
                 <NavLink
                     key={item.path}
@@ -22,8 +22,8 @@ const MobileNav = () => {
                         clsx(
                             "flex flex-col items-center gap-1 p-2 rounded-lg transition-colors",
                             isActive
-                                ? "text-mint-500"
-                                : "text-slate-500 hover:text-slate-300"
+                                ? "text-mint-600 dark:text-mint-500"
+                                : "text-slate-500 dark:text-slate-500 hover:text-navy-900 dark:hover:text-slate-300"
                         )
                     }
                 >

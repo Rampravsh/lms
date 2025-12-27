@@ -29,13 +29,13 @@ const atRiskStudents = [
 ];
 
 const StatCard = ({ title, value, icon: Icon, color }) => (
-    <div className="bg-navy-800 p-6 rounded-2xl border border-navy-700/50 flex items-center gap-4">
-        <div className={`p-4 rounded-xl bg-navy-900 ${color}`}>
+    <div className="bg-white dark:bg-navy-800 p-6 rounded-2xl border border-slate-200 dark:border-navy-700/50 flex items-center gap-4 shadow-sm dark:shadow-none transition-colors">
+        <div className={`p-4 rounded-xl bg-slate-100 dark:bg-navy-900 ${color} bg-opacity-10 dark:bg-opacity-100`}>
             <Icon size={24} />
         </div>
         <div>
-            <p className="text-slate-400 text-sm">{title}</p>
-            <h3 className="text-2xl font-bold text-white">{value}</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">{title}</p>
+            <h3 className="text-2xl font-bold text-slate-800 dark:text-white">{value}</h3>
         </div>
     </div>
 );
@@ -45,8 +45,8 @@ const Analytics = () => {
         <div className="space-y-6 animate-fade-in">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-white">Instructor Analytics</h1>
-                    <p className="text-slate-400">Class performance overview and insights.</p>
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Instructor Analytics</h1>
+                    <p className="text-slate-500 dark:text-slate-400">Class performance overview and insights.</p>
                 </div>
             </div>
 
@@ -60,8 +60,8 @@ const Analytics = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Bar Chart Component */}
-                <div className="bg-navy-800 p-6 rounded-2xl border border-navy-700">
-                    <h3 className="text-lg font-semibold text-white mb-6">Class Average Scores by Subject</h3>
+                <div className="bg-white dark:bg-navy-800 p-6 rounded-2xl border border-slate-200 dark:border-navy-700 shadow-sm dark:shadow-none transition-colors">
+                    <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-6">Class Average Scores by Subject</h3>
                     <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={data}>
@@ -80,8 +80,8 @@ const Analytics = () => {
                 </div>
 
                 {/* Login Activity Heatmap (Simplified as a Grid for now) */}
-                <div className="bg-navy-800 p-6 rounded-2xl border border-navy-700">
-                    <h3 className="text-lg font-semibold text-white mb-6">Student Login Activity (Last 7 Days)</h3>
+                <div className="bg-white dark:bg-navy-800 p-6 rounded-2xl border border-slate-200 dark:border-navy-700 shadow-sm dark:shadow-none transition-colors">
+                    <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-6">Student Login Activity (Last 7 Days)</h3>
 
                     <div className="grid grid-cols-7 gap-2 h-64 items-end">
                         {loginActivity.map((day, idx) => (
@@ -90,7 +90,7 @@ const Analytics = () => {
                                     className="w-full bg-mint-500/20 rounded-md relative group-hover:bg-mint-500/40 transition-colors"
                                     style={{ height: `${(day.count / 150) * 100}%` }}
                                 >
-                                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-navy-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-navy-700 pointer-events-none z-10">
+                                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 dark:bg-navy-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-slate-700 dark:border-navy-700 pointer-events-none z-10">
                                         {day.count} logins
                                     </div>
                                 </div>
@@ -102,32 +102,32 @@ const Analytics = () => {
             </div>
 
             {/* At Risk Students List */}
-            <div className="bg-navy-800 rounded-2xl border border-navy-700 overflow-hidden">
-                <div className="p-6 border-b border-navy-700">
-                    <h3 className="text-lg font-semibold text-white">At-Risk Students Requiring Attention</h3>
+            <div className="bg-white dark:bg-navy-800 rounded-2xl border border-slate-200 dark:border-navy-700 overflow-hidden shadow-sm dark:shadow-none transition-colors">
+                <div className="p-6 border-b border-slate-200 dark:border-navy-700">
+                    <h3 className="text-lg font-semibold text-slate-800 dark:text-white">At-Risk Students Requiring Attention</h3>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="bg-navy-900 text-slate-400 text-sm uppercase tracking-wider">
+                            <tr className="bg-slate-50 dark:bg-navy-900 text-slate-500 dark:text-slate-400 text-sm uppercase tracking-wider">
                                 <th className="px-6 py-4 font-medium">Student Name</th>
                                 <th className="px-6 py-4 font-medium">Risk Factor</th>
                                 <th className="px-6 py-4 font-medium">Last Active</th>
                                 <th className="px-6 py-4 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-navy-700">
+                        <tbody className="divide-y divide-slate-100 dark:divide-navy-700">
                             {atRiskStudents.map((student) => (
-                                <tr key={student.id} className="hover:bg-navy-700/50 transition-colors">
-                                    <td className="px-6 py-4 text-white font-medium">{student.name}</td>
+                                <tr key={student.id} className="hover:bg-slate-50 dark:hover:bg-navy-700/50 transition-colors">
+                                    <td className="px-6 py-4 text-slate-800 dark:text-white font-medium">{student.name}</td>
                                     <td className="px-6 py-4">
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-500/10 text-orange-400 border border-orange-500/20">
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20">
                                             {student.risk}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-slate-400 text-sm">{student.lastActive}</td>
+                                    <td className="px-6 py-4 text-slate-500 dark:text-slate-400 text-sm">{student.lastActive}</td>
                                     <td className="px-6 py-4 text-right">
-                                        <button className="text-blue-400 hover:text-blue-300 text-sm font-medium hover:underline">
+                                        <button className="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 text-sm font-medium hover:underline">
                                             View Profile
                                         </button>
                                     </td>
