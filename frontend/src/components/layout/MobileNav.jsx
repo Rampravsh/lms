@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, TrendingUp, BookOpen, Calendar, User } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, BookOpen, Calendar, MessageSquare } from 'lucide-react';
 import clsx from 'clsx';
 
 const MobileNav = () => {
@@ -9,7 +9,7 @@ const MobileNav = () => {
         { icon: TrendingUp, label: 'Analytics', path: '/analytics' },
         { icon: BookOpen, label: 'Courses', path: '/courses' },
         { icon: Calendar, label: 'Calendar', path: '/calendar' },
-        { icon: User, label: 'Profile', path: '/profile' },
+        { icon: MessageSquare, label: 'Messages', path: '/messages' },
     ];
 
     return (

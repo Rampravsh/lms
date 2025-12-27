@@ -4,6 +4,9 @@ import Analytics from './pages/Analytics';
 import Dashboard from './pages/Dashboard';
 import Courses from './pages/Courses';
 import CoursePlayer from './pages/CoursePlayer';
+import Calendar from './pages/Calendar';
+import Messages from './pages/Messages';
+import Settings from './pages/Settings';
 import Layout from './components/layout/Layout';
 import { CourseProvider } from './context/CourseContext';
 
@@ -17,11 +20,9 @@ function App() {
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/courses" element={<Courses />} />
             <Route path="/courses/:courseId/learn" element={<CoursePlayer />} />
-
-            {/* Placeholder routes */}
-            <Route path="/calendar" element={<div className="text-white p-8">Calendar Page</div>} />
-            <Route path="/messages" element={<div className="text-white p-8">Messages Page</div>} />
-            <Route path="/settings" element={<div className="text-white p-8">Settings Page</div>} />
+            <Route path="/calendar" element={<Calendar />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/settings" element={<Settings />} />
           </Routes>
         </Layout>
       </Router>
