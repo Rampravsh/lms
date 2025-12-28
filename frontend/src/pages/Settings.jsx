@@ -1,5 +1,7 @@
 import React from 'react';
-import { User, Bell, Lock, Moon, Sun, Mail, Save, Shield } from 'lucide-react';
+import { User, Bell, Lock, Moon, Sun, Mail, Save, Shield, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import ThemeToggle from '../components/common/ThemeToggle'; // We'll need to slightly adjust ThemeToggle styling if needed, or wrap it
 
 const SettingsSection = ({ title, icon: Icon, children }) => (
@@ -13,6 +15,14 @@ const SettingsSection = ({ title, icon: Icon, children }) => (
 );
 
 const Settings = () => {
+    const { logout } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
+
     return (
         <div className="space-y-6 max-w-4xl mx-auto pb-10">
             <header className="mb-8">
@@ -115,8 +125,17 @@ const Settings = () => {
                 </SettingsSection>
             </div>
 
-            <div className="flex justify-end pt-6 border-t border-slate-200 dark:border-navy-800">
-                <button className="px-6 py-3 bg-mint-500 text-navy-900 font-bold rounded-xl flex items-center gap-2 hover:bg-mint-400 transition-colors shadow-lg shadow-mint-500/20">
+            {/* Actions Footer */}
+            <div className="pt-6 border-t border-slate-200 dark:border-navy-800 flex flex-col md:flex-row justify-between items-center gap-4">
+                <button
+                    onClick={handleLogout}
+                    className="w-full md:w-auto px-6 py-3 border border-red-200 dark:border-red-900/30 text-red-500 dark:text-red-400 font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                >
+                    <LogOut size={20} />
+                    Logout
+                </button>
+
+                <button className="w-full md:w-auto px-6 py-3 bg-mint-500 text-navy-900 font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-mint-400 transition-colors shadow-lg shadow-mint-500/20">
                     <Save size={20} />
                     Save Changes
                 </button>

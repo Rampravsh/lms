@@ -1,10 +1,10 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import MobileNav from './MobileNav';
 import { Settings as SettingsIcon } from 'lucide-react';
 
-const Layout = ({ children }) => {
+const Layout = () => {
     return (
         <div className="flex h-screen bg-slate-50 dark:bg-navy-800 text-slate-900 dark:text-white font-sans transition-colors duration-300 overflow-hidden">
             {/* Sidebar (Desktop) */}
@@ -28,7 +28,7 @@ const Layout = ({ children }) => {
                 {/* Scrollable Content Area */}
                 <main className="flex-1 overflow-y-auto w-full p-4 md:p-8 pt-20 md:pt-24 mb-16 md:mb-0 scroll-smooth">
                     <div className="max-w-7xl mx-auto min-h-full">
-                        {children}
+                        <Outlet />
                     </div>
                 </main>
 
