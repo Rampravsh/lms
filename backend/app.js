@@ -18,6 +18,9 @@ app.use(cors({
 }));
 
 // Mount routers
+app.get('/', (req, res) => {
+    res.send('Hello World!');
+});
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
 
