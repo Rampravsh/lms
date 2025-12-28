@@ -1,18 +1,24 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginUser } from '../store/slices/authSlice';
 import { Lock, Mail, ArrowRight, BookOpen } from 'lucide-react';
 
 const Login = () => {
-    const { login } = useAuth();
+    const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { isLoading, error } = useSelector((state) => state.auth);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleLogin = (role) => {
-        // In a real app, we would validate credentials here
-        login(role);
-        navigate('/');
+    const handleLogin = async (role) => {
+        // We are passing role just to simulate different buttons, 
+        // but real login depends on credentials. 
+        // For now, we'll just send email/password.
+        const resultAction = await dispatch(loginUser({ email, password }));
+        if (loginUser.fulfilled.match(resultAction)) {
+            navigate('/');
+        }
     };
 
     return (
@@ -25,6 +31,7 @@ const Login = () => {
                         </div>
                         <h1 className="text-3xl font-bold text-navy-900 dark:text-white mb-2">Welcome Back</h1>
                         <p className="text-slate-500 dark:text-slate-400">Sign in to access your learning dashboard</p>
+                        {error && <p className="text-red-500 mt-2">{error}</p>}
                     </div>
 
                     <div className="space-y-4 mb-8">
@@ -64,7 +71,7 @@ const Login = () => {
                             onClick={() => handleLogin('student')}
                             className="w-full bg-mint-500 hover:bg-mint-400 text-navy-900 font-bold py-3.5 rounded-xl transition-all transform hover:scale-[1.02] shadow-lg shadow-mint-500/25 flex items-center justify-center gap-2"
                         >
-                            Login as Student
+                            {isLoading ? 'Logging in...' : 'Login as Student'}
                             <ArrowRight size={20} />
                         </button>
                         <button

@@ -1,8 +1,9 @@
 import React from 'react';
 import { User, Bell, Lock, Moon, Sun, Mail, Save, Shield, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import ThemeToggle from '../components/common/ThemeToggle'; // We'll need to slightly adjust ThemeToggle styling if needed, or wrap it
+import { useDispatch } from 'react-redux';
+import { logoutUser } from '../store/slices/authSlice';
+import ThemeToggle from '../components/common/ThemeToggle';
 
 const SettingsSection = ({ title, icon: Icon, children }) => (
     <div className="bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-navy-700">
@@ -15,11 +16,11 @@ const SettingsSection = ({ title, icon: Icon, children }) => (
 );
 
 const Settings = () => {
-    const { logout } = useAuth();
+    const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const handleLogout = () => {
-        logout();
+    const handleLogout = async () => {
+        await dispatch(logoutUser());
         navigate('/login');
     };
 

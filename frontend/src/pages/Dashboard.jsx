@@ -2,7 +2,9 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Play, Flame, Clock, CalendarDays, MoreVertical, BookOpen } from 'lucide-react';
 import clsx from 'clsx';
-import { useCourses } from '../context/CourseContext';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchStudentDashboard } from '../store/slices/courseSlice';
 
 // --- Sub-Components ---
 const ProgressCircle = ({ percentage, label, colorClass, grade }) => {
@@ -128,21 +130,30 @@ const AssignmentItem = ({ title, due, subject, icon: Icon }) => (
 )
 
 const Dashboard = () => {
-    const { courses, enrolledCourses, getCourseProgress } = useCourses();
+    const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { dashboard, isLoading } = useSelector((state) => state.courses);
+    const { user } = useSelector((state) => state.auth);
 
-    // Get the first enrolled course for the "Continue Learning" card
-    // In a real app, this might be the "last accessed" course
-    const activeCourseId = enrolledCourses.length > 0 ? enrolledCourses[0] : null;
-    const activeCourse = activeCourseId ? courses.find(c => c.id === activeCourseId) : null;
-    const activeProgress = activeCourse ? getCourseProgress(activeCourse.id) : 0;
+    useEffect(() => {
+        dispatch(fetchStudentDashboard());
+    }, [dispatch]);
+
+    if (isLoading || !dashboard) {
+        return <div className="p-8 text-center text-slate-500">Loading dashboard...</div>;
+    }
+
+    const { enrolledCourses, completedCourses, totalHours, activeCourse } = dashboard;
+
+    // Placeholder for progress until backend provides it per course in this endpoint
+    const activeProgress = 0;
 
     return (
         <div className="space-y-8 animate-fade-in">
             {/* Header */}
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-1">Welcome back, Alex!</h1>
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-1">Welcome back, {user?.name || 'Student'}!</h1>
                     <p className="text-slate-500 dark:text-slate-400">Here's what's happening with your courses today.</p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -168,10 +179,10 @@ const Dashboard = () => {
                 </div>
 
                 <div className="cursor-pointer transition-transform hover:-translate-y-1" onClick={() => navigate('/courses')}>
-                    <StatWidget icon={BookOpen} title="Active Courses" value={enrolledCourses.length} subtext="View all courses" />
+                    <StatWidget icon={BookOpen} title="Active Courses" value={enrolledCourses} subtext="View all courses" />
                 </div>
-                <StatWidget icon={Flame} title="Study Streak" value="12 Days" subtext="Keep it up!" />
-                <StatWidget icon={Clock} title="Hours Spent" value="24.5h" subtext="+2.5h from last week" />
+                <StatWidget icon={Flame} title="Study Streak" value="0 Days" subtext="Keep it up!" />
+                <StatWidget icon={Clock} title="Hours Spent" value={`${totalHours}h`} subtext="Total learning time" />
 
                 <div className="bg-white dark:bg-navy-800 p-6 rounded-2xl border border-slate-200 dark:border-navy-700/50 shadow-sm dark:shadow-none">
                     <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-4">Upcoming Assignments</h3>
@@ -189,7 +200,7 @@ const Dashboard = () => {
                         <ContinueLearningCard
                             course={activeCourse}
                             progress={activeProgress}
-                            onResume={() => navigate(`/courses/${activeCourse.id}/learn`)}
+                            onResume={() => navigate(`/courses/${activeCourse._id}/learn`)}
                         />
                     ) : (
                         <div className="bg-white dark:bg-navy-800 p-8 rounded-2xl border border-dashed border-slate-300 dark:border-navy-700 text-center flex flex-col items-center justify-center h-64">
