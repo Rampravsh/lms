@@ -109,6 +109,52 @@ exports.verifyOTP = asyncHandler(async (req, res, next) => {
     );
 });
 
+// @desc    Resend OTP
+// @route   POST /api/auth/resend-otp
+// @access  Public
+exports.resendOTP = asyncHandler(async (req, res, next) => {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        throw new ApiError(404, 'User not found');
+    }
+
+    if (user.isVerified) {
+        throw new ApiError(400, 'User is already verified');
+    }
+
+    // Check if an OTP already exists to prevent spamming (optional, but good practice)
+    // For now, we'll just overwrite/create new one.
+    // Ideally, we should check if one was sent recently. 
+    // Since we have TTL, we can just create a new one.
+
+    // Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Delete existing OTP if any (to avoid multiple valid OTPs)
+    await OTP.deleteOne({ email });
+
+    await OTP.create({
+        email,
+        otp
+    });
+
+    // Send OTP Email
+    try {
+        await sendEmail({
+            email: user.email,
+            subject: 'LMS Account Verification OTP (Resend)',
+            message: `Your new OTP for account verification is: ${otp}. It expires in 10 minutes.`
+        });
+    } catch (error) {
+        throw new ApiError(500, 'Email could not be sent. Please try again.');
+    }
+
+    res.status(200).json(new ApiResponse(200, {}, 'OTP resent successfully'));
+});
+
 // @desc    Login user
 // @route   POST /api/auth/login
 // @access  Public

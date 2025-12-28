@@ -1,9 +1,9 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useSelector } from 'react-redux';
 
 const RoleRoute = ({ allowedRoles }) => {
-    const { user } = useAuth();
+    const { user } = useSelector((state) => state.auth);
 
     // If not logged in, ProtectedRoute should have caught this, but double check
     if (!user) {

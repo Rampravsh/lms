@@ -24,6 +24,8 @@ exports.protect = asyncHandler(async (req, res, next) => {
         req.user = await User.findById(decoded.id);
         next();
     } catch (err) {
+        console.error('Auth Middleware Error:', err.message);
+        console.log('Token received:', token);
         throw new ApiError(401, 'Not authorized to access this route');
     }
 });

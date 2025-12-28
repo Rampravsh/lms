@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { registerUser } from '../store/slices/authSlice';
 import { User, Mail, Lock, BookOpen, ArrowRight } from 'lucide-react';
 import clsx from 'clsx';
 
 const Signup = () => {
-    const { login } = useAuth();
+    const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { isLoading, error } = useSelector((state) => state.auth);
 
     // Form State
     const [name, setName] = useState('');
@@ -14,11 +16,12 @@ const Signup = () => {
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('student'); // Default role
 
-    const handleSignup = (e) => {
+    const handleSignup = async (e) => {
         e.preventDefault();
-        // Mock registration logic -> Auto login
-        login(role);
-        navigate('/');
+        const resultAction = await dispatch(registerUser({ name, email, password, role }));
+        if (registerUser.fulfilled.match(resultAction)) {
+            navigate('/verify-otp', { state: { email } });
+        }
     };
 
     return (
@@ -31,6 +34,7 @@ const Signup = () => {
                         </div>
                         <h1 className="text-3xl font-bold text-navy-900 dark:text-white mb-2">Create Account</h1>
                         <p className="text-slate-500 dark:text-slate-400">Join our learning community today</p>
+                        {error && <p className="text-red-500 mt-2">{error}</p>}
                     </div>
 
                     <form onSubmit={handleSignup} className="space-y-4 mb-8">
@@ -115,9 +119,10 @@ const Signup = () => {
 
                         <button
                             type="submit"
-                            className="w-full bg-mint-500 hover:bg-mint-400 text-navy-900 font-bold py-3.5 rounded-xl transition-all transform hover:scale-[1.02] shadow-lg shadow-mint-500/25 flex items-center justify-center gap-2 mt-2"
+                            disabled={isLoading}
+                            className="w-full bg-mint-500 hover:bg-mint-400 text-navy-900 font-bold py-3.5 rounded-xl transition-all transform hover:scale-[1.02] shadow-lg shadow-mint-500/25 flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
                         >
-                            Create Account
+                            {isLoading ? 'Creating Account...' : 'Create Account'}
                             <ArrowRight size={20} />
                         </button>
                     </form>

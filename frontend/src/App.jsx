@@ -9,6 +9,7 @@ import Messages from './pages/Messages';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import OTPVerification from './pages/OTPVerification';
 import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import RoleRoute from './components/auth/RoleRoute';
@@ -23,6 +24,7 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/verify-otp" element={<OTPVerification />} />
 
             {/* Protected Routes */}
             <Route element={<ProtectedRoute />}>
