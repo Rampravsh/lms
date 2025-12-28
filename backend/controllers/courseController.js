@@ -1,4 +1,6 @@
 const Course = require('../models/Course');
+const Module = require('../models/Module');
+const Lesson = require('../models/Lesson');
 const ApiError = require('../utils/ApiError');
 const ApiResponse = require('../utils/ApiResponse');
 const asyncHandler = require('../utils/asyncHandler');
@@ -7,7 +9,10 @@ const asyncHandler = require('../utils/asyncHandler');
 // @route   GET /api/courses
 // @access  Public
 exports.getAllCourses = asyncHandler(async (req, res, next) => {
-    const courses = await Course.find({ isPublished: true }).populate('instructor', 'name avatar');
+    const courses = await Course.find({ isPublished: true })
+        .populate('instructor', 'name avatar')
+        .select('-modules -studentsEnrolled'); // Exclude heavy fields for list view
+
     res.status(200).json(new ApiResponse(200, courses, 'Courses fetched successfully'));
 });
 
@@ -15,13 +20,49 @@ exports.getAllCourses = asyncHandler(async (req, res, next) => {
 // @route   GET /api/courses/:id
 // @access  Public
 exports.getCourseById = asyncHandler(async (req, res, next) => {
-    const course = await Course.findById(req.params.id).populate('instructor', 'name avatar').populate('modules');
+    const course = await Course.findById(req.params.id)
+        .populate('instructor', 'name avatar')
+        .populate({
+            path: 'modules',
+            options: { sort: { order: 1 } },
+            populate: {
+                path: 'lessons',
+                model: 'Lesson'
+            }
+        });
 
     if (!course) {
         throw new ApiError(404, 'Course not found');
     }
 
-    res.status(200).json(new ApiResponse(200, course, 'Course fetched successfully'));
+    // Transform for frontend: Flatten modules' lessons into a single 'videos' array
+    // The frontend expects: { id, title, duration, ... } where id is the YouTube ID
+    // We assume 'videoUrl' in Lesson model stores the YouTube ID.
+    const courseObj = course.toObject();
+
+    const videos = [];
+    if (courseObj.modules) {
+        courseObj.modules.forEach(module => {
+            if (module.lessons) {
+                module.lessons.forEach(lesson => {
+                    videos.push({
+                        id: lesson.videoUrl, // Assuming videoUrl stores the YouTube ID
+                        _id: lesson._id,     // Keep internal ID just in case
+                        title: lesson.title,
+                        duration: lesson.duration ? `${lesson.duration} min` : '10 min', // Format if needed
+                        isFree: lesson.isFree,
+                        moduleTitle: module.title
+                    });
+                });
+            }
+        });
+    }
+
+    courseObj.videos = videos;
+    // We can remove modules from response if frontend doesn't need the hierarchy
+    // courseObj.modules = undefined; 
+
+    res.status(200).json(new ApiResponse(200, courseObj, 'Course fetched successfully'));
 });
 
 // @desc    Create new course
@@ -30,7 +71,11 @@ exports.getCourseById = asyncHandler(async (req, res, next) => {
 exports.createCourse = asyncHandler(async (req, res, next) => {
     req.body.instructor = req.user.id;
 
+    // Basic Course Creation
     const course = await Course.create(req.body);
+
+    // If modules/lessons are provided in the request (e.g. from a JSON import)
+    // We would handle them here. For now, we assume the user creates the course shell first.
 
     res.status(201).json(new ApiResponse(201, course, 'Course created successfully'));
 });
@@ -76,4 +121,40 @@ exports.deleteCourse = asyncHandler(async (req, res, next) => {
     await course.deleteOne();
 
     res.status(200).json(new ApiResponse(200, {}, 'Course deleted successfully'));
+});
+
+// @desc    Add Module to Course
+// @route   POST /api/courses/:id/modules
+// @access  Private (Instructor)
+exports.addModule = asyncHandler(async (req, res) => {
+    const course = await Course.findById(req.params.id);
+    if (!course) throw new ApiError(404, 'Course not found');
+
+    const moduleDoc = await Module.create({
+        ...req.body,
+        course: course._id
+    });
+
+    course.modules.push(moduleDoc._id);
+    await course.save();
+
+    res.status(201).json(new ApiResponse(201, moduleDoc, 'Module added'));
+});
+
+// @desc    Add Lesson to Module
+// @route   POST /api/modules/:moduleId/lessons
+// @access  Private (Instructor)
+exports.addLesson = asyncHandler(async (req, res) => {
+    const moduleDoc = await Module.findById(req.params.moduleId);
+    if (!moduleDoc) throw new ApiError(404, 'Module not found');
+
+    const lesson = await Lesson.create({
+        ...req.body,
+        module: moduleDoc._id
+    });
+
+    moduleDoc.lessons.push(lesson._id);
+    await moduleDoc.save();
+
+    res.status(201).json(new ApiResponse(201, lesson, 'Lesson added'));
 });
