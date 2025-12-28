@@ -15,7 +15,7 @@ const Login = () => {
         // We are passing role just to simulate different buttons, 
         // but real login depends on credentials. 
         // For now, we'll just send email/password.
-        const resultAction = await dispatch(loginUser({ email, password }));
+        const resultAction = await dispatch(loginUser({ email, password, role }));
         if (loginUser.fulfilled.match(resultAction)) {
             navigate('/');
         }

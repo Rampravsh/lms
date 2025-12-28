@@ -159,7 +159,7 @@ exports.resendOTP = asyncHandler(async (req, res, next) => {
 // @route   POST /api/auth/login
 // @access  Public
 exports.login = asyncHandler(async (req, res, next) => {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
     const user = await User.findOne({ email });
 
@@ -171,6 +171,11 @@ exports.login = asyncHandler(async (req, res, next) => {
 
     if (!isMatch) {
         throw new ApiError(401, 'Invalid credentials');
+    }
+
+    // Check Role
+    if (role && user.role !== role) {
+        throw new ApiError(401, `Access denied: You are not authorized as a ${role}`);
     }
 
     if (!user.isVerified) {
