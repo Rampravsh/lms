@@ -245,3 +245,65 @@ exports.getAllUsers = asyncHandler(async (req, res, next) => {
         new ApiResponse(200, users, 'Users fetched successfully')
     );
 });
+// @desc    Update user profile
+// @route   PUT /api/auth/profile
+// @access  Private
+exports.updateProfile = asyncHandler(async (req, res, next) => {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+        throw new ApiError(404, 'User not found');
+    }
+
+    user.name = req.body.name || user.name;
+    user.bio = req.body.bio || user.bio;
+    user.avatar = req.body.avatar || user.avatar;
+
+    if (req.body.notifications) {
+        user.notifications = { ...user.notifications, ...req.body.notifications };
+    }
+
+    // Email update could require re-verification, let's keep it simple for now or disallow
+    // if (req.body.email && req.body.email !== user.email) { ... }
+
+    await user.save();
+
+    res.status(200).json(
+        new ApiResponse(200, {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            avatar: user.avatar,
+            bio: user.bio,
+            notifications: user.notifications
+        }, 'Profile updated successfully')
+    );
+});
+
+// @desc    Change password
+// @route   PUT /api/auth/password
+// @access  Private
+exports.changePassword = asyncHandler(async (req, res, next) => {
+    const { currentPassword, newPassword } = req.body;
+
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+        throw new ApiError(404, 'User not found');
+    }
+
+    // Check current password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+        throw new ApiError(400, 'Invalid current password');
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+
+    await user.save();
+
+    res.status(200).json(new ApiResponse(200, {}, 'Password changed successfully'));
+});

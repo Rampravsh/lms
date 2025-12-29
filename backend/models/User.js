@@ -45,7 +45,17 @@ const userSchema = new mongoose.Schema({
   createdCourses: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Course'
-  }]
+  }],
+  notifications: {
+    courseUpdates: { type: Boolean, default: true },
+    newMessages: { type: Boolean, default: true },
+    assignmentDeadlines: { type: Boolean, default: true },
+    promotionalEmails: { type: Boolean, default: false }
+  },
+  twoFactorEnabled: {
+    type: Boolean,
+    default: false
+  }
 }, {
   timestamps: true
 });
