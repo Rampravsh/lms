@@ -1,5 +1,5 @@
 const express = require('express');
-const { register, verifyOTP, login, logout, resendOTP, getMe } = require('../controllers/authController');
+const { register, verifyOTP, login, logout, resendOTP, getMe, getAllUsers } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 
 const router = express.Router();
@@ -10,5 +10,6 @@ router.post('/login', login);
 router.post('/logout', logout);
 router.post('/resend-otp', resendOTP);
 router.get('/me', protect, getMe);
+router.get('/users', protect, getAllUsers);
 
 module.exports = router;

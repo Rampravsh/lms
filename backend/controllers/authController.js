@@ -233,3 +233,15 @@ exports.getMe = asyncHandler(async (req, res, next) => {
         }, 'User details fetched successfully')
     );
 });
+
+// @desc    Get all users (for chat contacts)
+// @route   GET /api/auth/users
+// @access  Private
+exports.getAllUsers = asyncHandler(async (req, res, next) => {
+    // Fetch all users except the current one
+    const users = await User.find({ _id: { $ne: req.user.id } }).select('-password');
+
+    res.status(200).json(
+        new ApiResponse(200, users, 'Users fetched successfully')
+    );
+});

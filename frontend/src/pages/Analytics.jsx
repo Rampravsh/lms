@@ -60,9 +60,9 @@ const Analytics = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Bar Chart Component */}
-                <div className="bg-white dark:bg-navy-800 p-6 rounded-2xl border border-slate-200 dark:border-navy-700 shadow-sm dark:shadow-none transition-colors">
-                    <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-6">Class Average Scores by Subject</h3>
-                    <div className="h-64">
+                <div className="bg-white dark:bg-navy-800 rounded-2xl shadow-sm border border-slate-200 dark:border-navy-700 p-6">
+                    <h2 className="text-xl font-bold text-navy-900 dark:text-white mb-6">User Growth</h2>
+                    <div className="h-[300px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={data}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
