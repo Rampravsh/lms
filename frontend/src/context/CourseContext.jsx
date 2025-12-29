@@ -1,12 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { courses as coursesData } from '../data/courses';
 
 const CourseContext = createContext();
 
 export const useCourses = () => useContext(CourseContext);
 
 export const CourseProvider = ({ children }) => {
-    const [courses] = useState(coursesData);
+    const [courses] = useState([]);
 
     // Progress state: { [courseId]: { [videoId]: true, ... } }
     const [progress, setProgress] = useState(() => {

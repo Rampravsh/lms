@@ -25,16 +25,13 @@ const courseSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        required: true
     },
     level: {
         type: String,
         enum: ['beginner', 'intermediate', 'advanced'],
-        required: true
     },
     language: {
         type: String,
-        required: true
     },
     modules: [{
         type: mongoose.Schema.Types.ObjectId,

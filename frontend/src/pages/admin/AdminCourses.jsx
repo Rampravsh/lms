@@ -54,8 +54,8 @@ const AdminCourses = () => {
                                         <div className="flex items-center gap-4">
                                             <div className="w-16 h-10 rounded-lg bg-slate-200 dark:bg-navy-900 overflow-hidden">
                                                 <img
-                                                    src={course.thumbnail}
-                                                    alt=""
+                                                    src={course.thumbnail || '/placeholder.png'}
+                                                    alt="thumbnail"
                                                     className="w-full h-full object-cover"
                                                 />
                                             </div>
@@ -110,7 +110,7 @@ const AdminCourses = () => {
                             ))}
                             {courses.length === 0 && !isLoading && (
                                 <tr>
-                                    <td colspan="5" className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
+                                    <td colSpan="5" className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
                                         No courses found. Create your first course to get started.
                                     </td>
                                 </tr>

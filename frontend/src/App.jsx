@@ -25,6 +25,14 @@ function App() {
 
   useEffect(() => {
     dispatch(loadUser());
+
+    // Initialize theme
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }, [dispatch]);
 
   return (

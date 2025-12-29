@@ -76,7 +76,7 @@ const Courses = () => {
                                 {/* Thumbnail */}
                                 <div className="relative h-48 bg-slate-200 dark:bg-navy-700">
                                     <img
-                                        src={course.thumbnail}
+                                        src={course.thumbnail||'/placeholder.png'}
                                         alt={course.title}
                                         className="w-full h-full object-cover"
                                     />
