@@ -25,6 +25,7 @@ const io = socketIo(server, {
 });
 
 let onlineUsers = new Map(); // userId -> socketId
+let offlineMessageQueue = new Map(); // userId -> [messages]
 
 io.on('connection', (socket) => {
     console.log('New client connected', socket.id);
@@ -35,6 +36,17 @@ io.on('connection', (socket) => {
         // Broadcast online users list
         io.emit('onlineUsers', Array.from(onlineUsers.keys()));
         console.log(`User ${userId} is online`);
+
+        // Check for offline messages
+        if (offlineMessageQueue.has(userId)) {
+            const messages = offlineMessageQueue.get(userId);
+            messages.forEach((msg) => {
+                io.to(socket.id).emit('receiveMessage', msg);
+            });
+            // Clear queue after delivery
+            offlineMessageQueue.delete(userId);
+            console.log(`Delivered ${messages.length} offline messages to ${userId}`);
+        }
     });
 
     // Handle Send Message
@@ -48,6 +60,17 @@ io.on('connection', (socket) => {
                 content,
                 timestamp
             });
+        } else {
+            // Receiver is offline, queue the message
+            if (!offlineMessageQueue.has(receiverId)) {
+                offlineMessageQueue.set(receiverId, []);
+            }
+            offlineMessageQueue.get(receiverId).push({
+                senderId,
+                content,
+                timestamp
+            });
+            console.log(`User ${receiverId} is offline. Message queued.`);
         }
         // Note: No DB persistence as per requirement.
     });
