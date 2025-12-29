@@ -1,3 +1,4 @@
+const express = require('express');
 const { register, verifyOTP, login, logout, resendOTP, getMe } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 

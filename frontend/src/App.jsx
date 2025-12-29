@@ -47,6 +47,7 @@ function App() {
               <Route element={<RoleRoute allowedRoles={['admin', 'instructor']} />}>
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/admin/courses" element={<AdminCourses />} />
+                <Route path="/admin/courses/:id" element={<CourseEditor />} />
                 <Route path="/admin/courses/:id/edit" element={<CourseEditor />} />
               </Route>
 

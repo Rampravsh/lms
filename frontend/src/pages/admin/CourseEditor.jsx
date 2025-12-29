@@ -20,8 +20,10 @@ const CourseEditor = () => {
         price: 0,
         thumbnail: '',
         introVideo: '',
+        language: 'English',
         isPublished: false
     });
+
 
     const [newModuleTitle, setNewModuleTitle] = useState('');
     const [activeModuleId, setActiveModuleId] = useState(null);
@@ -44,6 +46,7 @@ const CourseEditor = () => {
                 price: currentCourse.price || 0,
                 thumbnail: currentCourse.thumbnail || '',
                 introVideo: currentCourse.introVideo || '',
+                language: currentCourse.language || 'English',
                 isPublished: currentCourse.isPublished || false
             });
         }
@@ -207,6 +210,22 @@ const CourseEditor = () => {
                                         <option value="advanced">Advanced</option>
                                     </select>
                                 </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Language</label>
+                                <select
+                                    name="language"
+                                    value={formData.language}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-2 bg-slate-50 dark:bg-navy-900 border border-slate-200 dark:border-navy-700 rounded-lg focus:ring-2 focus:ring-mint-500 outline-none"
+                                >
+                                    <option value="English">English</option>
+                                    <option value="Spanish">Spanish</option>
+                                    <option value="French">French</option>
+                                    <option value="German">German</option>
+                                    <option value="Chinese">Chinese</option>
+                                </select>
                             </div>
 
                             <div>
