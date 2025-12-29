@@ -16,3 +16,15 @@ To get started with this project, please follow the steps below:
     ```bash
     npm start
     ```
+## Features
+
+-   **Course Management:** Create, edit, and organize course content efficiently.
+-   **Student Progress Tracking:** Monitor student engagement and completion rates.
+-   **Responsive Design:** Fully optimized for desktop, tablet, and mobile devices.
+-   **User Authentication:** Secure login and role-based access control.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+
