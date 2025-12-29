@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser } from '../../store/slices/authSlice';
-import { LayoutDashboard, BookOpen, Calendar, MessageSquare, Settings, LogOut, TrendingUp, Smartphone, LogIn } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Calendar, MessageSquare, Settings, LogOut, TrendingUp, Smartphone, LogIn, Video } from 'lucide-react';
 import clsx from 'clsx';
 
 const Sidebar = () => {
@@ -19,6 +19,7 @@ const Sidebar = () => {
         { icon: LayoutDashboard, label: 'Dashboard', path: '/', hideForRoles: ['admin'] },
         { icon: TrendingUp, label: 'Analytics', path: '/analytics', roles: ['admin'] },
         { icon: BookOpen, label: 'Courses', path: '/courses' },
+        { icon: Video, label: 'Manage Courses', path: '/admin/courses', roles: ['admin', 'instructor'] },
         { icon: Calendar, label: 'Calendar', path: '/calendar', protected: true },
         { icon: MessageSquare, label: 'Messages', path: '/messages', protected: true },
         { icon: Settings, label: 'Settings', path: '/settings', protected: true },

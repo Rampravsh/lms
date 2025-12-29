@@ -13,39 +13,49 @@ import OTPVerification from './pages/OTPVerification';
 import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import RoleRoute from './components/auth/RoleRoute';
-import { CourseProvider } from './context/CourseContext';
 import { AuthProvider } from './context/AuthContext';
+import AdminCourses from './pages/admin/AdminCourses';
+import CourseEditor from './pages/admin/CourseEditor';
+import { useDispatch } from 'react-redux';
+import { loadUser } from './store/slices/authSlice';
+import { useEffect } from 'react';
 
 function App() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(loadUser());
+  }, [dispatch]);
+
   return (
     <Router>
       <AuthProvider>
-        <CourseProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/verify-otp" element={<OTPVerification />} />
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/verify-otp" element={<OTPVerification />} />
 
-            {/* Public Routes with Layout */}
-            <Route element={<Layout />}>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/courses" element={<Courses />} />
-              <Route path="/courses/:courseId/learn" element={<CoursePlayer />} />
+          {/* Public Routes with Layout */}
+          <Route element={<Layout />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/courses" element={<Courses />} />
+            <Route path="/courses/:courseId/learn" element={<CoursePlayer />} />
 
-              {/* Protected Routes inside Layout */}
-              <Route element={<ProtectedRoute />}>
-                {/* Admin Only Route */}
-                <Route element={<RoleRoute allowedRoles={['admin']} />}>
-                  <Route path="/analytics" element={<Analytics />} />
-                </Route>
-
-                <Route path="/calendar" element={<Calendar />} />
-                <Route path="/messages" element={<Messages />} />
-                <Route path="/settings" element={<Settings />} />
+            {/* Protected Routes inside Layout */}
+            <Route element={<ProtectedRoute />}>
+              {/* Admin Only Route */}
+              <Route element={<RoleRoute allowedRoles={['admin', 'instructor']} />}>
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/admin/courses" element={<AdminCourses />} />
+                <Route path="/admin/courses/:id/edit" element={<CourseEditor />} />
               </Route>
+
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/messages" element={<Messages />} />
+              <Route path="/settings" element={<Settings />} />
             </Route>
-          </Routes>
-        </CourseProvider>
+          </Route>
+        </Routes>
       </AuthProvider>
     </Router>
   );

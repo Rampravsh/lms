@@ -218,3 +218,18 @@ exports.logout = asyncHandler(async (req, res, next) => {
 
     res.status(200).json(new ApiResponse(200, {}, 'Logged out successfully'));
 });
+// @desc    Get current logged in user
+// @route   GET /api/auth/me
+// @access  Private
+exports.getMe = asyncHandler(async (req, res, next) => {
+    const user = await User.findById(req.user.id);
+
+    res.status(200).json(
+        new ApiResponse(200, {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role
+        }, 'User details fetched successfully')
+    );
+});

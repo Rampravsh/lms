@@ -66,11 +66,23 @@ export const logoutUser = createAsyncThunk(
     }
 );
 
+export const loadUser = createAsyncThunk(
+    'auth/loadUser',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await api.get('/auth/me');
+            return response.data.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to load user');
+        }
+    }
+);
+
 const initialState = {
     user: null,
     token: localStorage.getItem('token') || null,
     isAuthenticated: !!localStorage.getItem('token'),
-    isLoading: false,
+    isLoading: true, // Start loading to check for token
     error: null,
 };
 
@@ -84,6 +96,22 @@ const authSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            // Load User
+            .addCase(loadUser.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(loadUser.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.isAuthenticated = true;
+                state.user = action.payload;
+            })
+            .addCase(loadUser.rejected, (state) => {
+                state.isLoading = false;
+                state.isAuthenticated = false;
+                state.user = null;
+                state.token = null;
+                localStorage.removeItem('token');
+            })
             // Login
             .addCase(loginUser.pending, (state) => {
                 state.isLoading = true;
@@ -106,7 +134,6 @@ const authSlice = createSlice({
             })
             .addCase(registerUser.fulfilled, (state) => {
                 state.isLoading = false;
-                // Registration doesn't auto-login until OTP verify, usually
             })
             .addCase(registerUser.rejected, (state, action) => {
                 state.isLoading = false;

@@ -32,7 +32,11 @@ exports.protect = asyncHandler(async (req, res, next) => {
 
 exports.authorize = (...roles) => {
     return (req, res, next) => {
+        console.log(`[Authorize] Method: ${req.method}, URL: ${req.originalUrl}`);
+        console.log(`[Authorize] User Role: '${req.user.role}', Allowed Roles: ${JSON.stringify(roles)}`);
+
         if (!roles.includes(req.user.role)) {
+            console.log(`[Authorize] Access DENIED for role: ${req.user.role}`);
             throw new ApiError(
                 403,
                 `User role ${req.user.role} is not authorized to access this route`
