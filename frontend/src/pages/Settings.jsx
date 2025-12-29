@@ -27,6 +27,7 @@ const Settings = () => {
         name: '',
         email: '',
         bio: '',
+        avatar: '',
         notifications: {
             courseUpdates: true,
             newMessages: true,
@@ -59,6 +60,7 @@ const Settings = () => {
                         name: u.name || '',
                         email: u.email || '',
                         bio: u.bio || '',
+                        avatar: u.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.name}`,
                         notifications: {
                             courseUpdates: u.notifications?.courseUpdates ?? true,
                             newMessages: u.notifications?.newMessages ?? true,
@@ -89,6 +91,12 @@ const Settings = () => {
         }));
     };
 
+    const handleRegenerateAvatar = () => {
+        const randomSeed = Math.random().toString(36).substring(7);
+        const newAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${randomSeed}`;
+        setFormData(prev => ({ ...prev, avatar: newAvatar }));
+    };
+
     const handlePasswordChange = (e) => {
         const { name, value } = e.target;
         setPasswordData(prev => ({ ...prev, [name]: value }));
@@ -102,6 +110,7 @@ const Settings = () => {
             const response = await axios.put('http://localhost:8000/api/auth/profile', {
                 name: formData.name,
                 bio: formData.bio,
+                avatar: formData.avatar,
                 notifications: formData.notifications
             }, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -109,8 +118,7 @@ const Settings = () => {
 
             if (response.data.success) {
                 setSuccessMessage('Settings saved successfully!');
-                // Update redux if needed, simplest is to just rely on re-fetch or page reload, 
-                // but let's dispatch if we have an action. For now, assume persist handles it or next auth check.
+                dispatch(setUser(response.data.data)); // Update Redux state
                 setTimeout(() => setSuccessMessage(''), 3000);
             }
         } catch (error) {
@@ -172,10 +180,13 @@ const Settings = () => {
                     <div className="space-y-4">
                         <div className="flex items-center gap-4 mb-6">
                             <div className="w-16 h-16 bg-mint-500 rounded-full overflow-hidden border-2 border-slate-100 dark:border-navy-700">
-                                <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${formData.name}`} alt="Profile" />
+                                <img src={formData.avatar} alt="Profile" />
                             </div>
-                            <button className="text-sm font-semibold text-mint-600 dark:text-mint-400 hover:underline">
-                                Change Avatar (Auto-generated)
+                            <button
+                                onClick={handleRegenerateAvatar}
+                                className="text-sm font-semibold text-mint-600 dark:text-mint-400 hover:underline"
+                            >
+                                Change Avatar (Randomize)
                             </button>
                         </div>
                         <div>

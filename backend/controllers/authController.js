@@ -229,7 +229,10 @@ exports.getMe = asyncHandler(async (req, res, next) => {
             _id: user._id,
             name: user.name,
             email: user.email,
-            role: user.role
+            role: user.role,
+            avatar: user.avatar,
+            bio: user.bio,
+            notifications: user.notifications
         }, 'User details fetched successfully')
     );
 });
