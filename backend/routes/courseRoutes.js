@@ -5,8 +5,7 @@ const {
     createCourse,
     updateCourse,
     deleteCourse,
-    addModule,
-    addLesson
+    addVideo
 } = require('../controllers/courseController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
@@ -21,7 +20,6 @@ router.route('/:id')
     .put(protect, authorize('instructor', 'admin'), updateCourse)
     .delete(protect, authorize('instructor', 'admin'), deleteCourse);
 
-router.post('/:id/modules', protect, authorize('instructor', 'admin'), addModule);
-router.post('/modules/:moduleId/lessons', protect, authorize('instructor', 'admin'), addLesson);
+router.post('/:id/videos', protect, authorize('instructor', 'admin'), addVideo);
 
 module.exports = router;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchCourseById, createCourse, updateCourse, addModule, addLesson, clearCourseMessages } from '../../store/slices/courseSlice';
+import { fetchCourseById, createCourse, updateCourse, addVideo, clearCourseMessages } from '../../store/slices/courseSlice';
 import { Save, Plus, ArrowLeft, Video, GripVertical } from 'lucide-react';
 
 const CourseEditor = () => {
@@ -17,7 +17,7 @@ const CourseEditor = () => {
         description: '',
         category: '',
         level: 'beginner',
-        price: 0,
+
         thumbnail: '',
         introVideo: '',
         language: 'English',
@@ -25,9 +25,7 @@ const CourseEditor = () => {
     });
 
 
-    const [newModuleTitle, setNewModuleTitle] = useState('');
-    const [activeModuleId, setActiveModuleId] = useState(null);
-    const [newLesson, setNewLesson] = useState({ title: '', videoUrl: '', duration: 10, isFree: false });
+    const [newVideo, setNewVideo] = useState({ title: '', videoUrl: '', duration: 10, isFree: false });
 
     useEffect(() => {
         if (!isNew) {
@@ -43,7 +41,7 @@ const CourseEditor = () => {
                 description: currentCourse.description || '',
                 category: currentCourse.category || '',
                 level: currentCourse.level || 'beginner',
-                price: currentCourse.price || 0,
+
                 thumbnail: currentCourse.thumbnail || '',
                 introVideo: currentCourse.introVideo || '',
                 language: currentCourse.language || 'English',
@@ -54,9 +52,9 @@ const CourseEditor = () => {
 
     useEffect(() => {
         if (successMessage) {
-            // Optional: Show toast
             if (isNew && successMessage.includes('created')) {
-                // Determine new ID differently if possible, for now just go back
+                // After create, we might want to stay to add videos, or redirect. 
+                // Redirecting to list is fine, user can edit to add videos.
                 navigate('/admin/courses');
             }
         }
@@ -78,22 +76,13 @@ const CourseEditor = () => {
         }
     };
 
-    const handleAddModule = async () => {
-        if (!newModuleTitle.trim()) return;
-        await dispatch(addModule({ courseId: id, title: newModuleTitle }));
-        setNewModuleTitle('');
-        // Refresh course to see new module
-        dispatch(fetchCourseById(id));
-    };
-
-    const handleAddLesson = async (moduleId) => {
-        if (!newLesson.title.trim() || !newLesson.videoUrl.trim()) return;
-        await dispatch(addLesson({
-            moduleId,
-            lessonData: { ...newLesson, order: 99 } // Default order
+    const handleAddVideo = async () => {
+        if (!newVideo.title.trim() || !newVideo.videoUrl.trim()) return;
+        await dispatch(addVideo({
+            courseId: id,
+            videoData: { ...newVideo, order: (currentCourse.videos?.length || 0) + 1 }
         }));
-        setNewLesson({ title: '', videoUrl: '', duration: 10, isFree: false });
-        setActiveModuleId(null);
+        setNewVideo({ title: '', videoUrl: '', duration: 10, isFree: false });
         dispatch(fetchCourseById(id));
     };
 
@@ -187,16 +176,7 @@ const CourseEditor = () => {
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Price ($)</label>
-                                    <input
-                                        type="number"
-                                        name="price"
-                                        value={formData.price}
-                                        onChange={handleChange}
-                                        className="w-full px-4 py-2 bg-slate-50 dark:bg-navy-900 border border-slate-200 dark:border-navy-700 rounded-lg focus:ring-2 focus:ring-mint-500 outline-none"
-                                    />
-                                </div>
+
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Level</label>
                                     <select
@@ -256,102 +236,70 @@ const CourseEditor = () => {
 
                     {activeTab === 'curriculum' && (
                         <div className="space-y-6">
-                            {/* Modules List */}
+                            {/* Videos List */}
                             <div className="space-y-4">
-                                {currentCourse?.modules?.map((module) => (
-                                    <div key={module._id} className="border border-slate-200 dark:border-navy-700 rounded-xl overflow-hidden bg-slate-50 dark:bg-navy-900/50">
-                                        <div className="p-4 flex items-center justify-between bg-slate-100 dark:bg-navy-800">
-                                            <div className="flex items-center gap-3">
-                                                <GripVertical className="text-slate-400 cursor-move" size={20} />
-                                                <h4 className="font-bold text-slate-800 dark:text-white">{module.title}</h4>
-                                                <span className="text-xs text-slate-500 bg-white dark:bg-navy-900 px-2 py-0.5 rounded-full border border-slate-200 dark:border-navy-700">
-                                                    {module.lessons?.length || 0} Lessons
-                                                </span>
-                                            </div>
-                                            <button
-                                                onClick={() => setActiveModuleId(activeModuleId === module._id ? null : module._id)}
-                                                className="text-mint-600 hover:text-mint-500 text-sm font-medium"
-                                            >
-                                                {activeModuleId === module._id ? 'Cancel' : 'Add Lesson'}
-                                            </button>
+                                {currentCourse?.videos?.map((video, index) => (
+                                    <div key={video._id} className="flex items-center gap-3 p-4 bg-white dark:bg-navy-900 rounded-xl border border-slate-200 dark:border-navy-700">
+                                        <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-navy-800 flex items-center justify-center text-sm font-bold text-slate-500">
+                                            {index + 1}
                                         </div>
-
-                                        {/* Lessons List within Module */}
-                                        <div className="p-4 space-y-2">
-                                            {module.lessons?.map((lesson) => (
-                                                <div key={lesson._id} className="flex items-center gap-3 p-3 bg-white dark:bg-navy-900 rounded-lg border border-slate-200 dark:border-navy-700">
-                                                    <Video size={16} className="text-slate-400" />
-                                                    <span className="text-sm font-medium flex-1 text-slate-700 dark:text-slate-300">{lesson.title}</span>
-                                                    <span className="text-xs text-slate-400">{lesson.duration}m</span>
-                                                    {lesson.isFree && <span className="text-xs text-green-500 font-bold">Free</span>}
-                                                </div>
-                                            ))}
-                                            {(!module.lessons || module.lessons.length === 0) && (
-                                                <p className="text-center text-slate-400 text-sm py-2">No lessons in this module.</p>
-                                            )}
-
-                                            {/* Add Lesson Form */}
-                                            {activeModuleId === module._id && (
-                                                <div className="mt-4 p-4 bg-mint-50 dark:bg-mint-900/10 rounded-xl border border-mint-100 dark:border-mint-500/20">
-                                                    <h5 className="text-sm font-bold text-mint-800 dark:text-mint-400 mb-3">Add New Lesson</h5>
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Lesson Title"
-                                                            value={newLesson.title}
-                                                            onChange={(e) => setNewLesson({ ...newLesson, title: e.target.value })}
-                                                            className="px-3 py-2 rounded-lg border border-slate-200 dark:border-navy-700 text-sm"
-                                                        />
-                                                        <input
-                                                            type="text"
-                                                            placeholder="YouTube Video ID"
-                                                            value={newLesson.videoUrl}
-                                                            onChange={(e) => setNewLesson({ ...newLesson, videoUrl: e.target.value })}
-                                                            className="px-3 py-2 rounded-lg border border-slate-200 dark:border-navy-700 text-sm"
-                                                        />
-                                                        <input
-                                                            type="number"
-                                                            placeholder="Duration (min)"
-                                                            value={newLesson.duration}
-                                                            onChange={(e) => setNewLesson({ ...newLesson, duration: Number(e.target.value) })}
-                                                            className="px-3 py-2 rounded-lg border border-slate-200 dark:border-navy-700 text-sm"
-                                                        />
-                                                        <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={newLesson.isFree}
-                                                                onChange={(e) => setNewLesson({ ...newLesson, isFree: e.target.checked })}
-                                                            />
-                                                            Free Preview
-                                                        </label>
-                                                    </div>
-                                                    <button
-                                                        onClick={() => handleAddLesson(module._id)}
-                                                        className="w-full py-2 bg-mint-500 text-navy-900 font-bold rounded-lg text-sm hover:bg-mint-400"
-                                                    >
-                                                        Add Lesson
-                                                    </button>
-                                                </div>
-                                            )}
+                                        <div className="flex-1">
+                                            <h4 className="font-bold text-slate-800 dark:text-white">{video.title}</h4>
+                                            <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
+                                                <span>{video.duration}m</span>
+                                                {video.isFree && <span className="text-green-500 font-bold">Free Preview</span>}
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            {/* Placeholder for Edit/Delete video if needed later */}
                                         </div>
                                     </div>
                                 ))}
+                                {(!currentCourse?.videos || currentCourse.videos.length === 0) && (
+                                    <p className="text-center text-slate-400 py-8">No videos added yet.</p>
+                                )}
                             </div>
 
-                            {/* Add Module Section */}
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    placeholder="New Module Title"
-                                    value={newModuleTitle}
-                                    onChange={(e) => setNewModuleTitle(e.target.value)}
-                                    className="flex-1 px-4 py-2 bg-white dark:bg-navy-800 border border-slate-200 dark:border-navy-700 rounded-xl focus:ring-2 focus:ring-mint-500 outline-none"
-                                />
+                            {/* Add Video Form */}
+                            <div className="p-6 bg-slate-50 dark:bg-navy-900/50 rounded-2xl border border-slate-200 dark:border-navy-700">
+                                <h3 className="text-lg font-bold text-navy-900 dark:text-white mb-4">Add New Video</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                    <input
+                                        type="text"
+                                        placeholder="Video Title"
+                                        value={newVideo.title}
+                                        onChange={(e) => setNewVideo({ ...newVideo, title: e.target.value })}
+                                        className="px-4 py-2 rounded-xl border border-slate-200 dark:border-navy-700 outline-none focus:ring-2 focus:ring-mint-500"
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="YouTube Video ID or URL"
+                                        value={newVideo.videoUrl}
+                                        onChange={(e) => setNewVideo({ ...newVideo, videoUrl: e.target.value })}
+                                        className="px-4 py-2 rounded-xl border border-slate-200 dark:border-navy-700 outline-none focus:ring-2 focus:ring-mint-500"
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder="Duration (minutes)"
+                                        value={newVideo.duration}
+                                        onChange={(e) => setNewVideo({ ...newVideo, duration: Number(e.target.value) })}
+                                        className="px-4 py-2 rounded-xl border border-slate-200 dark:border-navy-700 outline-none focus:ring-2 focus:ring-mint-500"
+                                    />
+                                    <label className="flex items-center gap-2 text-slate-700 dark:text-slate-300 px-4">
+                                        <input
+                                            type="checkbox"
+                                            checked={newVideo.isFree}
+                                            onChange={(e) => setNewVideo({ ...newVideo, isFree: e.target.checked })}
+                                            className="w-5 h-5 text-mint-500 rounded focus:ring-mint-500"
+                                        />
+                                        Free Preview
+                                    </label>
+                                </div>
                                 <button
-                                    onClick={handleAddModule}
-                                    className="bg-slate-800 text-white px-6 py-2 rounded-xl font-bold hover:bg-slate-700"
+                                    onClick={handleAddVideo}
+                                    className="w-full bg-mint-500 hover:bg-mint-400 text-navy-900 font-bold py-3 rounded-xl transition-colors"
                                 >
-                                    Add Module
+                                    Add Video to Course
                                 </button>
                             </div>
                         </div>

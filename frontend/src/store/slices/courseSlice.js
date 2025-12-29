@@ -74,33 +74,14 @@ export const deleteCourse = createAsyncThunk(
     }
 );
 
-export const addModule = createAsyncThunk(
-    'courses/addModule',
-    async ({ courseId, title }, { rejectWithValue }) => {
+export const addVideo = createAsyncThunk(
+    'courses/addVideo',
+    async ({ courseId, videoData }, { rejectWithValue }) => {
         try {
-            const response = await api.post(`/courses/${courseId}/modules`, { title });
+            const response = await api.post(`/courses/${courseId}/videos`, videoData);
             return response.data.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Failed to add module');
-        }
-    }
-);
-
-export const addLesson = createAsyncThunk(
-    'courses/addLesson',
-    async ({ moduleId, lessonData }, { rejectWithValue }) => {
-        try {
-            // Updated to match backend route structure if needed, or keep if backend route is actually /api/modules/:id/lessons
-            // Looking at courseRoutes.js line 25: router.post('/modules/:moduleId/lessons', ...)
-            // It seems correct in my previous reading? Let me double check courseRoutes.js content from history.
-            // Ah, line 25 says: router.post('/modules/:moduleId/lessons', ...);
-            // This is mounted on /api/courses in app.js? No, wait.
-            // app.js: app.use('/api/courses', courseRoutes);
-            // So the full path is /api/courses/modules/:moduleId/lessons
-            const response = await api.post(`/courses/modules/${moduleId}/lessons`, lessonData);
-            return response.data.data;
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Failed to add lesson');
+            return rejectWithValue(error.response?.data?.message || 'Failed to add video');
         }
     }
 );
@@ -183,13 +164,13 @@ const courseSlice = createSlice({
                 state.courses = state.courses.filter(c => c._id !== action.payload);
                 state.successMessage = 'Course deleted successfully';
             })
-            // Add Module
-            .addCase(addModule.fulfilled, (state, action) => {
-                state.successMessage = 'Module added successfully';
-            })
-            // Add Lesson
-            .addCase(addLesson.fulfilled, (state, action) => {
-                state.successMessage = 'Lesson added successfully';
+            // Add Video
+            .addCase(addVideo.fulfilled, (state, action) => {
+                state.successMessage = 'Video added successfully';
+                // Optimistically update currentCourse if it matches
+                if (state.currentCourse && state.currentCourse._id === action.payload.course) {
+                    state.currentCourse.videos = [...(state.currentCourse.videos || []), action.payload];
+                }
             });
     },
 });

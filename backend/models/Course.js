@@ -15,10 +15,7 @@ const courseSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    price: {
-        type: Number,
-        default: 0
-    },
+    // price field removed
     thumbnail: {
         type: String,
         default: ''
@@ -33,9 +30,9 @@ const courseSchema = new mongoose.Schema({
     language: {
         type: String,
     },
-    modules: [{
+    videos: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Module'
+        ref: 'Video'
     }],
     studentsEnrolled: [{
         type: mongoose.Schema.Types.ObjectId,

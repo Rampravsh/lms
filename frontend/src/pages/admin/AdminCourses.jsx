@@ -80,7 +80,7 @@ const AdminCourses = () => {
                                         <div className="flex items-center gap-4">
                                             <div className="flex items-center gap-1.5" title="Modules">
                                                 <Video size={16} className="text-slate-400" />
-                                                <span>{course.modules?.length || 0}</span>
+                                                <span>{course.videos?.length || 0}</span>
                                             </div>
                                             <div className="flex items-center gap-1.5" title="Students">
                                                 <Users size={16} className="text-slate-400" />

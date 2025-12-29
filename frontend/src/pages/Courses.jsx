@@ -66,7 +66,7 @@ const Courses = () => {
                         const enrolled = isEnrolled(course.id || course._id);
                         // Mock progress for now
                         const progress = 0;
-                        const videoCount = course.modules?.reduce((acc, mod) => acc + (mod.lessons?.length || 0), 0) || 0;
+                        const videoCount = course.videos?.length || 0;
 
                         return (
                             <div
@@ -76,7 +76,7 @@ const Courses = () => {
                                 {/* Thumbnail */}
                                 <div className="relative h-48 bg-slate-200 dark:bg-navy-700">
                                     <img
-                                        src={course.thumbnail||'/placeholder.png'}
+                                        src={course.thumbnail || '/placeholder.png'}
                                         alt={course.title}
                                         className="w-full h-full object-cover"
                                     />
