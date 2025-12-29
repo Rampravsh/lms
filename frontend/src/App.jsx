@@ -26,18 +26,19 @@ function App() {
             <Route path="/signup" element={<Signup />} />
             <Route path="/verify-otp" element={<OTPVerification />} />
 
-            {/* Protected Routes */}
-            <Route element={<ProtectedRoute />}>
-              <Route element={<Layout />}>
-                <Route path="/" element={<Dashboard />} />
+            {/* Public Routes with Layout */}
+            <Route element={<Layout />}>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/courses" element={<Courses />} />
+              <Route path="/courses/:courseId/learn" element={<CoursePlayer />} />
 
+              {/* Protected Routes inside Layout */}
+              <Route element={<ProtectedRoute />}>
                 {/* Admin Only Route */}
                 <Route element={<RoleRoute allowedRoles={['admin']} />}>
                   <Route path="/analytics" element={<Analytics />} />
                 </Route>
 
-                <Route path="/courses" element={<Courses />} />
-                <Route path="/courses/:courseId/learn" element={<CoursePlayer />} />
                 <Route path="/calendar" element={<Calendar />} />
                 <Route path="/messages" element={<Messages />} />
                 <Route path="/settings" element={<Settings />} />

@@ -8,8 +8,8 @@ const MobileNav = () => {
     const { user } = useAuth();
 
     const navItems = [
-        { icon: LayoutDashboard, label: 'Home', path: '/' },
-        { icon: TrendingUp, label: 'Analytics', path: '/analytics', roles: ['admin'] },
+        { icon: LayoutDashboard, label: 'Home', path: '/', hideForRoles: ['admin'] },
+        { icon: TrendingUp, label: 'Analysis', path: '/analytics', roles: ['admin'] },
         { icon: BookOpen, label: 'Courses', path: '/courses' },
         { icon: Calendar, label: 'Calendar', path: '/calendar' },
         { icon: MessageSquare, label: 'Messages', path: '/messages' },
@@ -18,7 +18,11 @@ const MobileNav = () => {
     return (
         <div className="fixed bottom-0 left-0 w-full bg-white dark:bg-navy-900 border-t border-slate-200 dark:border-navy-800 p-2 flex justify-around items-center z-50 md:hidden pb-safe transition-colors duration-300">
             {navItems
-                .filter(item => !item.roles || (user && item.roles.includes(user.role)))
+                .filter(item => {
+                    if (item.hideForRoles && user && item.hideForRoles.includes(user.role)) return false;
+                    if (item.roles && (!user || !item.roles.includes(user.role))) return false;
+                    return true;
+                })
                 .map((item) => (
                     <NavLink
                         key={item.path}

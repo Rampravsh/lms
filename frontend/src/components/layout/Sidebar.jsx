@@ -1,25 +1,27 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, BookOpen, Calendar, MessageSquare, Settings, LogOut, TrendingUp, Smartphone } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { logoutUser } from '../../store/slices/authSlice';
+import { LayoutDashboard, BookOpen, Calendar, MessageSquare, Settings, LogOut, TrendingUp, Smartphone, LogIn } from 'lucide-react';
 import clsx from 'clsx';
 
 const Sidebar = () => {
-    const { user, logout } = useAuth();
+    const dispatch = useDispatch();
+    const { user } = useSelector((state) => state.auth);
     const navigate = useNavigate();
 
-    const handleLogout = () => {
-        logout();
+    const handleLogout = async () => {
+        await dispatch(logoutUser());
         navigate('/login');
     };
 
     const navItems = [
-        { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+        { icon: LayoutDashboard, label: 'Dashboard', path: '/', hideForRoles: ['admin'] },
         { icon: TrendingUp, label: 'Analytics', path: '/analytics', roles: ['admin'] },
         { icon: BookOpen, label: 'Courses', path: '/courses' },
-        { icon: Calendar, label: 'Calendar', path: '/calendar' },
-        { icon: MessageSquare, label: 'Messages', path: '/messages' },
-        { icon: Settings, label: 'Settings', path: '/settings' },
+        { icon: Calendar, label: 'Calendar', path: '/calendar', protected: true },
+        { icon: MessageSquare, label: 'Messages', path: '/messages', protected: true },
+        { icon: Settings, label: 'Settings', path: '/settings', protected: true },
     ];
 
     return (
@@ -33,7 +35,12 @@ const Sidebar = () => {
 
             <nav className="flex-1 px-4 py-4 space-y-2">
                 {navItems
-                    .filter(item => !item.roles || (user && item.roles.includes(user.role)))
+                    .filter(item => {
+                        if (item.hideForRoles && user && item.hideForRoles.includes(user.role)) return false;
+                        if (item.roles && (!user || !item.roles.includes(user.role))) return false;
+                        if (item.protected && !user) return false;
+                        return true;
+                    })
                     .map((item) => (
                         <NavLink
                             key={item.path}
@@ -54,13 +61,25 @@ const Sidebar = () => {
             </nav>
 
             <div className="p-4 border-t border-slate-200 dark:border-navy-800">
-                <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 w-full hover:bg-slate-100 dark:hover:bg-navy-800 rounded-xl transition-colors"
-                >
-                    <LogOut size={20} />
-                    <span>Logout</span>
-                </button>
+                <div className="p-4 border-t border-slate-200 dark:border-navy-800">
+                    {user ? (
+                        <button
+                            onClick={handleLogout}
+                            className="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 w-full hover:bg-slate-100 dark:hover:bg-navy-800 rounded-xl transition-colors"
+                        >
+                            <LogOut size={20} />
+                            <span>Logout</span>
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => navigate('/login')}
+                            className="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-mint-600 dark:hover:text-mint-400 w-full hover:bg-slate-100 dark:hover:bg-navy-800 rounded-xl transition-colors"
+                        >
+                            <LogIn size={20} />
+                            <span>Login</span>
+                        </button>
+                    )}
+                </div>
             </div>
         </aside>
     );

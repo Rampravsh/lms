@@ -133,11 +133,96 @@ const Dashboard = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { dashboard, isLoading } = useSelector((state) => state.courses);
-    const { user } = useSelector((state) => state.auth);
+    const { user, isAuthenticated } = useSelector((state) => state.auth);
 
     useEffect(() => {
-        dispatch(fetchStudentDashboard());
-    }, [dispatch]);
+        if (isAuthenticated) {
+            if (user?.role === 'admin') {
+                navigate('/analytics');
+            } else {
+                dispatch(fetchStudentDashboard());
+            }
+        }
+    }, [dispatch, isAuthenticated, user, navigate]);
+
+    // --- Public / Demo Dashboard Logic ---
+    if (!isAuthenticated) {
+        return (
+            <div className="space-y-8 animate-fade-in">
+                {/* Public Header */}
+                <div className="flex justify-between items-center">
+                    <div>
+                        <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-1">Welcome to LMS</h1>
+                        <p className="text-slate-500 dark:text-slate-400">Start your learning journey today.</p>
+                    </div>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={() => navigate('/login')}
+                            className="px-6 py-2 bg-white dark:bg-navy-800 text-slate-700 dark:text-white font-semibold rounded-xl border border-slate-200 dark:border-navy-700 hover:bg-slate-50 dark:hover:bg-navy-700 transition-colors"
+                        >
+                            Login
+                        </button>
+                        <button
+                            onClick={() => navigate('/signup')}
+                            className="px-6 py-2 bg-mint-500 text-navy-900 font-bold rounded-xl hover:bg-mint-400 transition-colors shadow-lg shadow-mint-500/20"
+                        >
+                            Get Started
+                        </button>
+                    </div>
+                </div>
+
+                {/* Demo Stats Grid (Blurred/Locked) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+                    {/* Overlay for locking content */}
+                    <div className="absolute inset-0 z-10 bg-white/50 dark:bg-navy-900/50 backdrop-blur-sm flex items-center justify-center rounded-2xl border border-slate-200 dark:border-navy-700">
+                        <div className="text-center p-6 bg-white dark:bg-navy-800 rounded-2xl shadow-xl border border-slate-100 dark:border-navy-700">
+                            <h3 className="text-xl font-bold text-navy-900 dark:text-white mb-2">Track Your Progress</h3>
+                            <p className="text-slate-500 dark:text-slate-400 mb-4">Log in to see your stats, streak, and learning hours.</p>
+                            <button
+                                onClick={() => navigate('/login')}
+                                className="px-6 py-2 bg-mint-500 text-navy-900 font-bold rounded-xl hover:bg-mint-400 transition-colors"
+                            >
+                                Login to View
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Mock Widgets behind blur */}
+                    <div className="bg-white dark:bg-navy-800 p-6 rounded-2xl border border-slate-200 dark:border-navy-700/50 flex flex-col justify-between opacity-50">
+                        <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-4">Overall Progress</h3>
+                        <div className="flex justify-between items-end">
+                            <ProgressCircle percentage={0} label="Course Completion" colorClass="text-mint-500" />
+                            <ProgressCircle percentage={0} label="Quiz Performance" colorClass="text-blue-500" />
+                            <ProgressCircle percentage={0} grade="-" label="Grade" colorClass="text-purple-500" />
+                        </div>
+                    </div>
+                    <StatWidget icon={BookOpen} title="Active Courses" value="-" subtext="View all courses" />
+                    <StatWidget icon={Flame} title="Study Streak" value="-" subtext="Keep it up!" />
+                    <StatWidget icon={Clock} title="Hours Spent" value="-" subtext="Total learning time" />
+                </div>
+
+                {/* Public Course Teaser */}
+                <div className="bg-gradient-to-br from-navy-900 to-navy-800 rounded-3xl p-8 md:p-12 text-center text-white relative overflow-hidden">
+                    <div className="relative z-10 max-w-2xl mx-auto">
+                        <h2 className="text-3xl md:text-4xl font-bold mb-4">Explore Our Premium Courses</h2>
+                        <p className="text-slate-300 mb-8 text-lg">Access high-quality content, expert instructors, and a supportive community. Join thousands of learners today.</p>
+                        <button
+                            onClick={() => navigate('/courses')}
+                            className="px-8 py-3 bg-mint-500 text-navy-900 font-bold text-lg rounded-xl hover:bg-mint-400 transition-transform hover:scale-105 shadow-xl shadow-mint-500/20"
+                        >
+                            Browse All Courses
+                        </button>
+                    </div>
+                    {/* Decorative Background */}
+                    <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+                        <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                            <path d="M0 100 C 20 0 50 0 100 100 Z" fill="white" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (isLoading || !dashboard) {
         return <div className="p-8 text-center text-slate-500">Loading dashboard...</div>;

@@ -1,10 +1,13 @@
 import React from 'react';
 import { Link, Outlet } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import Sidebar from './Sidebar';
 import MobileNav from './MobileNav';
 import { Settings as SettingsIcon } from 'lucide-react';
 
 const Layout = () => {
+    const { user } = useSelector((state) => state.auth);
+
     return (
         <div className="flex h-screen bg-slate-50 dark:bg-navy-800 text-slate-900 dark:text-white font-sans transition-colors duration-300 overflow-hidden">
             {/* Sidebar (Desktop) */}
@@ -18,7 +21,7 @@ const Layout = () => {
                 {/* Fixed Glass Header */}
                 <header className="fixed top-0 right-0 left-0 md:left-64 h-16 flex items-center justify-end px-6 z-20 backdrop-blur-md bg-white/70 dark:bg-navy-900/80 border-b border-transparent transition-colors duration-300">
                     <Link
-                        to="/settings"
+                        to={user ? "/settings" : "/login"}
                         className="p-2 rounded-full bg-slate-200/50 dark:bg-navy-700/50 text-slate-800 dark:text-white hover:bg-slate-300/50 dark:hover:bg-navy-600/50 transition-colors backdrop-blur-sm"
                     >
                         <SettingsIcon size={20} />
