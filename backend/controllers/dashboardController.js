@@ -63,7 +63,7 @@ exports.getStudentDashboard = asyncHandler(async (req, res) => {
     const activeCourse = lastActiveProgress ? lastActiveProgress.course : null;
     const activeProgress = lastActiveProgress ? lastActiveProgress.completionPercentage : 0;
 
-    console.log(`[Dashboard] User ${userId}: TotalHours=${totalHours}, ActiveCourse=${activeCourse?.title}, Progress=${activeProgress}%`);
+
 
     res.status(200).json(new ApiResponse(200, {
         enrolledCourses: enrolledCoursesCount,

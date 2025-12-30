@@ -53,12 +53,10 @@ exports.register = asyncHandler(async (req, res, next) => {
             message: `Your OTP for account verification is: ${otp}. It expires in 5 minutes.`
         });
     } catch (error) {
-        console.error("Email send error:", error);
-        // If email fails, we might want to delete the user or just warn. 
-        // For now, let's throw error but keep user (they can resend OTP later if we implement that)
-        // Or better, delete user to allow retry
-        await User.findByIdAndDelete(user._id);
-        throw new ApiError(500, 'Email could not be sent. Please try again.');
+        console.error("Email send error (proceeding anyway):", error);
+        // Fallback: If email fails (e.g. Render blocking SMTP), auto-verify user so they can login
+        user.isVerified = true;
+        await user.save();
     }
 
     res.status(201).json(

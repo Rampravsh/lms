@@ -34,14 +34,14 @@ let onlineUsers = new Map(); // userId -> socketId
 let offlineMessageQueue = new Map(); // userId -> [messages]
 
 io.on('connection', (socket) => {
-    console.log('New client connected', socket.id);
+    // console.log('New client connected', socket.id);
 
     // User joins with their ID
     socket.on('join', (userId) => {
         onlineUsers.set(userId, socket.id);
         // Broadcast online users list
         io.emit('onlineUsers', Array.from(onlineUsers.keys()));
-        console.log(`User ${userId} is online`);
+        // console.log(`User ${userId} is online`);
 
         // Check for offline messages
         if (offlineMessageQueue.has(userId)) {
@@ -51,7 +51,7 @@ io.on('connection', (socket) => {
             });
             // Clear queue after delivery
             offlineMessageQueue.delete(userId);
-            console.log(`Delivered ${messages.length} offline messages to ${userId}`);
+            // console.log(`Delivered ${messages.length} offline messages to ${userId}`);
         }
     });
 
@@ -76,7 +76,7 @@ io.on('connection', (socket) => {
                 content,
                 timestamp
             });
-            console.log(`User ${receiverId} is offline. Message queued.`);
+            // console.log(`User ${receiverId} is offline. Message queued.`);
         }
         // Note: No DB persistence as per requirement.
     });
@@ -94,7 +94,7 @@ io.on('connection', (socket) => {
         if (disconnectedUserId) {
             onlineUsers.delete(disconnectedUserId);
             io.emit('onlineUsers', Array.from(onlineUsers.keys()));
-            console.log(`User ${disconnectedUserId} disconnected`);
+            // console.log(`User ${disconnectedUserId} disconnected`);
         }
     });
 });
