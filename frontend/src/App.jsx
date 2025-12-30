@@ -21,6 +21,8 @@ import { loadUser } from './store/slices/authSlice';
 import { useEffect } from 'react';
 import InstallPrompt from './components/InstallPrompt';
 
+import { SocketProvider } from './context/SocketContext';
+
 function App() {
   const dispatch = useDispatch();
 
@@ -39,36 +41,38 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <InstallPrompt />
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/verify-otp" element={<OTPVerification />} />
+        <SocketProvider>
+          <InstallPrompt />
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/verify-otp" element={<OTPVerification />} />
 
-          {/* Public Routes with Layout */}
-          <Route element={<Layout />}>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/courses" element={<Courses />} />
-            <Route path="/courses/:courseId/learn" element={<CoursePlayer />} />
+            {/* Public Routes with Layout */}
+            <Route element={<Layout />}>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/courses" element={<Courses />} />
+              <Route path="/courses/:courseId/learn" element={<CoursePlayer />} />
 
-            {/* Protected Routes inside Layout */}
-            <Route element={<ProtectedRoute />}>
-              {/* Admin Only Route */}
-              <Route element={<RoleRoute allowedRoles={['admin', 'instructor']} />}>
-                <Route path="/analytics" element={<Analytics />} />
-                <Route path="/admin/courses" element={<AdminCourses />} />
-                <Route path="/admin/courses/:id" element={<CourseEditor />} />
-                <Route path="/admin/courses/:id/edit" element={<CourseEditor />} />
+              {/* Protected Routes inside Layout */}
+              <Route element={<ProtectedRoute />}>
+                {/* Admin Only Route */}
+                <Route element={<RoleRoute allowedRoles={['admin', 'instructor']} />}>
+                  <Route path="/analytics" element={<Analytics />} />
+                  <Route path="/admin/courses" element={<AdminCourses />} />
+                  <Route path="/admin/courses/:id" element={<CourseEditor />} />
+                  <Route path="/admin/courses/:id/edit" element={<CourseEditor />} />
+                </Route>
+
+                <Route path="/calendar" element={<Calendar />} />
+                <Route path="/messages" element={<Messages />} />
+                <Route path="/settings" element={<Settings />} />
               </Route>
-
-              <Route path="/calendar" element={<Calendar />} />
-              <Route path="/messages" element={<Messages />} />
-              <Route path="/settings" element={<Settings />} />
             </Route>
-          </Route>
-        </Routes>
+          </Routes>
+        </SocketProvider>
       </AuthProvider>
-    </Router>
+    </Router >
   );
 }
 

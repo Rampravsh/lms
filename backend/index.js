@@ -33,6 +33,9 @@ const io = socketIo(server, {
 let onlineUsers = new Map(); // userId -> socketId
 let offlineMessageQueue = new Map(); // userId -> [messages]
 
+
+const User = require('./models/User'); // Import User model
+
 io.on('connection', (socket) => {
     // console.log('New client connected', socket.id);
 
@@ -81,7 +84,7 @@ io.on('connection', (socket) => {
         // Note: No DB persistence as per requirement.
     });
 
-    socket.on('disconnect', () => {
+    socket.on('disconnect', async () => {
         // Find userId from socketId to remove
         let disconnectedUserId;
         for (let [userId, socketId] of onlineUsers.entries()) {
@@ -94,6 +97,18 @@ io.on('connection', (socket) => {
         if (disconnectedUserId) {
             onlineUsers.delete(disconnectedUserId);
             io.emit('onlineUsers', Array.from(onlineUsers.keys()));
+
+            // Update lastSeen in DB
+            try {
+                await User.findByIdAndUpdate(disconnectedUserId, { lastSeen: new Date() });
+                // Optional: Emit specific status update if needed by frontend, 
+                // but re-fetching users list or just relying on onlineUsers + static lastSeen (on next fetch) might be enough.
+                // For real-time "last seen" updates, we can emit:
+                io.emit('userStatusCheck', { userId: disconnectedUserId, lastSeen: new Date() });
+            } catch (error) {
+                console.error('Error updating lastSeen:', error);
+            }
+
             // console.log(`User ${disconnectedUserId} disconnected`);
         }
     });

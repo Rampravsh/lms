@@ -4,11 +4,11 @@ import { Search, Send, Phone, Video, MoreVertical, User, MessageSquare } from 'l
 import io from 'socket.io-client';
 import clsx from 'clsx';
 import api from '../api/axios';
+import { useSocket } from '../context/SocketContext';
 
 const Messages = () => {
     const { user } = useSelector((state) => state.auth);
-    const [socket, setSocket] = useState(null);
-    const [onlineUsers, setOnlineUsers] = useState([]);
+    const { socket, onlineUsers } = useSocket();
     const [activeChat, setActiveChat] = useState(null);
     const [messageInput, setMessageInput] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
@@ -37,27 +37,18 @@ const Messages = () => {
         fetchUsers();
     }, [user]);
 
-    // Initialize Socket
+    // Initialize Socket Listeners (Socket instance comes from context)
     useEffect(() => {
-        if (!user) return;
+        if (!socket) return;
 
-        // Use environment variable for production, or dynamic hostname for local
-        const socketUrl = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:8000`;
-        const newSocket = io(socketUrl);
-        setSocket(newSocket);
-
-        newSocket.emit('join', user._id || user.id);
-
-        newSocket.on('onlineUsers', (users) => {
-            setOnlineUsers(users);
-        });
-
-        newSocket.on('receiveMessage', (message) => {
+        socket.on('receiveMessage', (message) => {
             handleReceiveMessage(message);
         });
 
-        return () => newSocket.close();
-    }, [user]);
+        return () => {
+            socket.off('receiveMessage');
+        };
+    }, [socket]);
 
     // Save conversations to local storage
     useEffect(() => {
@@ -139,7 +130,21 @@ const Messages = () => {
     // Filter contacts based on search
     const filteredContacts = contacts.filter(u =>
         u.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    ).sort((a, b) => {
+        // Sort by last message timestamp
+        const convA = conversations[a._id];
+        const convB = conversations[b._id];
+
+        const lastMsgTimeA = convA?.messages?.length > 0
+            ? new Date(convA.messages[convA.messages.length - 1].timestamp).getTime()
+            : 0;
+
+        const lastMsgTimeB = convB?.messages?.length > 0
+            ? new Date(convB.messages[convB.messages.length - 1].timestamp).getTime()
+            : 0;
+
+        return lastMsgTimeB - lastMsgTimeA;
+    });
 
     return (
         <div className="flex bg-white/70 dark:bg-navy-800/70 backdrop-blur-xl rounded-2xl shadow-sm border border-slate-200 dark:border-navy-700 h-[calc(100vh-8rem)] overflow-hidden animate-fade-in">
@@ -193,8 +198,10 @@ const Messages = () => {
                                     <div className="flex-1 min-w-0">
                                         <div className="flex justify-between items-baseline mb-1">
                                             <h3 className="font-semibold text-slate-900 dark:text-white truncate">{contact.name}</h3>
-                                            {lastMessage && (
+                                            {lastMessage ? (
                                                 <span className="text-xs text-slate-400">{formatTime(lastMessage.timestamp)}</span>
+                                            ) : (
+                                                !online && contact.lastSeen && <span className="text-[10px] text-slate-400">Last seen: {new Date(contact.lastSeen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                             )}
                                         </div>
                                         <p className={clsx("text-sm truncate", "text-slate-500 dark:text-slate-400")}>
@@ -231,7 +238,14 @@ const Messages = () => {
                                     <h3 className="font-bold text-slate-900 dark:text-white">{activeChat.name}</h3>
                                     <div className="flex items-center gap-1.5">
                                         <div className={`w-2 h-2 rounded-full ${isOnline(activeChat._id) ? 'bg-green-500' : 'bg-slate-400'}`}></div>
-                                        <span className="text-xs text-slate-500">{isOnline(activeChat._id) ? 'Online' : 'Offline'}</span>
+                                        <span className="text-xs text-slate-500">
+                                            {isOnline(activeChat._id)
+                                                ? 'Online'
+                                                : activeChat.lastSeen
+                                                    ? `Last seen ${new Date(activeChat.lastSeen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                                                    : 'Offline'
+                                            }
+                                        </span>
                                     </div>
                                 </div>
                             </div>
