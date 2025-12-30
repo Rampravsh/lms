@@ -1,8 +1,9 @@
 import axios from 'axios';
 
 const api = axios.create({
-    // Dynamically set base URL to support both localhost and network IP (mobile)
-    baseURL: `http://${window.location.hostname}:8000/api`,
+    // Use environment variable for API URL in production (e.g. Render backend)
+    // Fallback to dynamic hostname for local development (supports mobile/network IP)
+    baseURL: import.meta.env.VITE_API_URL || `http://${window.location.hostname}:8000/api`,
     withCredentials: true, // Send cookies with requests
     headers: {
         'Content-Type': 'application/json',
