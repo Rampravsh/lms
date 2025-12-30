@@ -79,26 +79,94 @@ exports.getStudentDashboard = asyncHandler(async (req, res) => {
 // @route   GET /api/dashboard/admin
 // @access  Private (Admin)
 exports.getAdminDashboard = asyncHandler(async (req, res) => {
-    // 1. Total Global Users (Platform-wide)
-    const totalUsers = await User.countDocuments({ role: 'student' });
-
-    // 2. Total Instructors (Platform-wide) - keeping this
-    const totalInstructors = await User.countDocuments({ role: 'instructor' });
-
-    // 3. YOUR Total Courses (Scoped)
-    const totalCourses = await Course.countDocuments({ instructor: req.user._id });
-
-    // 4. YOUR Total Enrollments (Scoped)
-    // Find all course IDs owned by this user
+    // 1. Total Students Enrolled in MY courses (Unique count)
     const myCourseIds = await Course.find({ instructor: req.user._id }).distinct('_id');
-
-    // Count Progress docs where course is in myCourseIds
     const totalEnrollments = await Progress.countDocuments({ course: { $in: myCourseIds } });
 
+    // Get unique student count
+    const uniqueStudents = await Progress.find({ course: { $in: myCourseIds } }).distinct('user');
+    const totalStudents = uniqueStudents.length;
+
+    // 2. Active Courses (Courses with at least 1 student)
+    const activeCoursesCount = await Progress.distinct('course', { course: { $in: myCourseIds } });
+    const totalCourses = activeCoursesCount.length;
+
+    // 3. Average Completion Rate (Across all my students)
+    const allProgress = await Progress.find({ course: { $in: myCourseIds } }).select('completionPercentage');
+    const totalCompletion = allProgress.reduce((acc, curr) => acc + (curr.completionPercentage || 0), 0);
+    const avgCompletionRate = allProgress.length > 0 ? Math.round(totalCompletion / allProgress.length) : 0;
+
+    // --- Analytics Charts Data ---
+
+    // 4. New Enrollments Growth (Last 6 Months - Scoped to MY courses)
+    const enrollmentGrowth = await Progress.aggregate([
+        {
+            $match: {
+                course: { $in: myCourseIds }
+            }
+        },
+        {
+            $group: {
+                _id: { $month: "$createdAt" },
+                count: { $sum: 1 }
+            }
+        },
+        { $sort: { _id: 1 } }
+    ]);
+
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const formattedGrowth = enrollmentGrowth.map(item => ({
+        subject: monthNames[item._id - 1],
+        avg: item.count
+    }));
+
+    // 5. Course Popularity (Top 5 Courses by Enrollment)
+    const coursePopularity = await Progress.aggregate([
+        { $match: { course: { $in: myCourseIds } } },
+        { $group: { _id: "$course", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 5 },
+        {
+            $lookup: {
+                from: "courses",
+                localField: "_id",
+                foreignField: "_id",
+                as: "courseInfo"
+            }
+        },
+        { $unwind: "$courseInfo" },
+        {
+            $project: {
+                subject: "$courseInfo.title",
+                avg: "$count" // Reusing 'avg' for bar chart compatibility
+            }
+        }
+    ]);
+
+    // 6. At-Risk Students (< 40% progress)
+    const atRiskDocs = await Progress.find({
+        course: { $in: myCourseIds },
+        completionPercentage: { $lt: 40 }
+    })
+        .populate('user', 'name lastSeen')
+        .sort({ completionPercentage: 1 })
+        .limit(5);
+
+    const atRiskStudents = atRiskDocs.map(doc => ({
+        id: doc.user._id,
+        name: doc.user.name,
+        risk: doc.completionPercentage === 0 ? 'Not Started' : 'Low Progress',
+        lastActive: doc.user.lastSeen ? new Date(doc.user.lastSeen).toLocaleDateString() : 'Never',
+        progress: doc.completionPercentage
+    }));
+
     res.status(200).json(new ApiResponse(200, {
-        totalUsers,
-        totalInstructors,
-        totalCourses,
-        totalEnrollments
-    }, 'Admin dashboard data fetched'));
+        totalStudents,
+        totalCourses, // Actually "Active Courses"
+        totalEnrollments,
+        avgCompletionRate,
+        enrollmentGrowth: formattedGrowth,
+        coursePopularity,
+        atRiskStudents
+    }, 'Instructor dashboard data fetched'));
 });

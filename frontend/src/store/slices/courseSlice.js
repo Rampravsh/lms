@@ -14,6 +14,18 @@ export const fetchStudentDashboard = createAsyncThunk(
     }
 );
 
+export const fetchAdminDashboard = createAsyncThunk(
+    'courses/fetchAdminDashboard',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await api.get('/dashboard/admin');
+            return response.data.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to fetch admin dashboard');
+        }
+    }
+);
+
 export const fetchCourses = createAsyncThunk(
     'courses/fetchAll',
     async (_, { rejectWithValue }) => {
@@ -151,6 +163,18 @@ const courseSlice = createSlice({
                 state.dashboard = action.payload;
             })
             .addCase(fetchStudentDashboard.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload;
+            })
+            // Admin Dashboard
+            .addCase(fetchAdminDashboard.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(fetchAdminDashboard.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.dashboard = action.payload; // Reusing the 'dashboard' state for both roles
+            })
+            .addCase(fetchAdminDashboard.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload;
             })

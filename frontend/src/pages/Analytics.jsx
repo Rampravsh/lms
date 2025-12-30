@@ -2,31 +2,9 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Users, AlertCircle, Clock, TrendingUp } from 'lucide-react';
 
-const data = [
-    { subject: 'Math', avg: 85 },
-    { subject: 'Physics', avg: 72 },
-    { subject: 'Chem', avg: 90 },
-    { subject: 'Bio', avg: 68 },
-    { subject: 'Eng', avg: 78 },
-    { subject: 'Hist', avg: 82 },
-];
-
-const loginActivity = [
-    { day: 'Mon', count: 120 },
-    { day: 'Tue', count: 145 },
-    { day: 'Wed', count: 132 },
-    { day: 'Thu', count: 98 },
-    { day: 'Fri', count: 150 },
-    { day: 'Sat', count: 45 },
-    { day: 'Sun', count: 30 },
-];
-
-const atRiskStudents = [
-    { name: 'Manuel Kenner', risk: 'Low Engagement', lastActive: 'Jun 25, 2023', id: 1 },
-    { name: 'Alslia Cemmis', risk: 'Missing Assignments', lastActive: 'Jun 25, 2023', id: 2 },
-    { name: 'Janastin Wium', risk: 'Low Test Scores', lastActive: 'Mar 13, 2023', id: 3 },
-    { name: 'Tasla Rrager', risk: 'Low Engagement', lastActive: 'May 22, 2023', id: 4 },
-];
+import { useDispatch, useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { fetchAdminDashboard } from '../store/slices/courseSlice';
 
 const StatCard = ({ title, value, icon: Icon, color }) => (
     <div className="bg-white dark:bg-navy-800 p-6 rounded-2xl border border-slate-200 dark:border-navy-700/50 flex items-center gap-4 shadow-sm dark:shadow-none transition-colors">
@@ -41,6 +19,17 @@ const StatCard = ({ title, value, icon: Icon, color }) => (
 );
 
 const Analytics = () => {
+    const dispatch = useDispatch();
+    const { dashboard, isLoading } = useSelector((state) => state.courses);
+
+    useEffect(() => {
+        dispatch(fetchAdminDashboard());
+    }, [dispatch]);
+
+    if (isLoading || !dashboard) {
+        return <div className="p-8 text-center">Loading analytics...</div>;
+    }
+
     return (
         <div className="space-y-6 animate-fade-in">
             <div className="flex justify-between items-center mb-6">
@@ -52,51 +41,64 @@ const Analytics = () => {
 
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard title="Total Students" value="1,240" icon={Users} color="text-blue-400" />
-                <StatCard title="At-Risk" value="12" icon={AlertCircle} color="text-red-400" />
-                <StatCard title="Avg. Attendance" value="92%" icon={Clock} color="text-mint-400" />
-                <StatCard title="Class Average" value="B+" icon={TrendingUp} color="text-orange-400" />
+                <StatCard title="Total Students" value={dashboard.totalStudents || 0} icon={Users} color="text-blue-400" />
+                <StatCard title="Active Courses" value={dashboard.totalCourses || 0} icon={TrendingUp} color="text-orange-400" />
+                <StatCard title="Total Enrollments" value={dashboard.totalEnrollments || 0} icon={Users} color="text-mint-400" />
+                <StatCard title="Avg. Completion" value={`${dashboard.avgCompletionRate || 0}%`} icon={Clock} color="text-red-400" />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Bar Chart Component */}
+                {/* Chart 1: Enrollment Growth */}
                 <div className="bg-white dark:bg-navy-800 rounded-2xl shadow-sm border border-slate-200 dark:border-navy-700 p-6">
-                    <h2 className="text-xl font-bold text-navy-900 dark:text-white mb-6">User Growth</h2>
-                    <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={data}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                                <XAxis dataKey="subject" tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                                <YAxis tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                                <Tooltip
-                                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc' }}
-                                    itemStyle={{ color: '#64ffda' }}
-                                    cursor={{ fill: 'transparent' }}
-                                />
-                                <Bar dataKey="avg" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={40} />
-                            </BarChart>
-                        </ResponsiveContainer>
+                    <h2 className="text-xl font-bold text-navy-900 dark:text-white mb-6">New Enrollments (Trends)</h2>
+                    <div className="h-[300px] w-full flex items-center justify-center">
+                        {(!dashboard.enrollmentGrowth || dashboard.enrollmentGrowth.length === 0 || dashboard.enrollmentGrowth.every(d => d.avg === 0)) ? (
+                            <div className="text-center text-slate-400">
+                                <p>No enrollment trends yet.</p>
+                                <p className="text-sm">Share your courses to get started!</p>
+                            </div>
+                        ) : (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={dashboard.enrollmentGrowth || []}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                                    <XAxis dataKey="subject" tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                                    <YAxis tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc' }}
+                                        itemStyle={{ color: '#64ffda' }}
+                                        cursor={{ fill: 'transparent' }}
+                                    />
+                                    <Bar dataKey="avg" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={40} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
                     </div>
                 </div>
 
-                {/* Login Activity Heatmap (Simplified as a Grid for now) */}
-                <div className="bg-white dark:bg-navy-800 p-6 rounded-2xl border border-slate-200 dark:border-navy-700 shadow-sm dark:shadow-none transition-colors">
-                    <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-6">Student Login Activity (Last 7 Days)</h3>
-
-                    <div className="grid grid-cols-7 gap-2 h-64 items-end">
-                        {loginActivity.map((day, idx) => (
-                            <div key={idx} className="flex flex-col items-center gap-2 group">
-                                <div
-                                    className="w-full bg-mint-500/20 rounded-md relative group-hover:bg-mint-500/40 transition-colors"
-                                    style={{ height: `${(day.count / 150) * 100}%` }}
-                                >
-                                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 dark:bg-navy-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-slate-700 dark:border-navy-700 pointer-events-none z-10">
-                                        {day.count} logins
-                                    </div>
-                                </div>
-                                <span className="text-xs text-slate-500">{day.day}</span>
+                {/* Chart 2: Course Popularity */}
+                <div className="bg-white dark:bg-navy-800 rounded-2xl shadow-sm border border-slate-200 dark:border-navy-700 p-6">
+                    <h2 className="text-xl font-bold text-navy-900 dark:text-white mb-6">Most Popular Courses</h2>
+                    <div className="h-[300px] w-full flex items-center justify-center">
+                        {(!dashboard.coursePopularity || dashboard.coursePopularity.length === 0) ? (
+                            <div className="text-center text-slate-400">
+                                <p>No data available.</p>
+                                <p className="text-sm">Enrollments will appear here.</p>
                             </div>
-                        ))}
+                        ) : (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={dashboard.coursePopularity || []} layout="vertical">
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" horizontal={false} />
+                                    <XAxis type="number" tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                                    <YAxis dataKey="subject" type="category" width={100} tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={false} tickLine={false} />
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc' }}
+                                        itemStyle={{ color: '#ffbd2e' }}
+                                        cursor={{ fill: 'transparent' }}
+                                    />
+                                    <Bar dataKey="avg" fill="#ffbd2e" radius={[0, 4, 4, 0]} barSize={20} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
                     </div>
                 </div>
             </div>
@@ -113,11 +115,15 @@ const Analytics = () => {
                                 <th className="px-6 py-4 font-medium">Student Name</th>
                                 <th className="px-6 py-4 font-medium">Risk Factor</th>
                                 <th className="px-6 py-4 font-medium">Last Active</th>
-                                <th className="px-6 py-4 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-navy-700">
-                            {atRiskStudents.map((student) => (
+                            {(dashboard.atRiskStudents || []).length === 0 && (
+                                <tr>
+                                    <td colSpan="3" className="px-6 py-4 text-center text-slate-500">No students currently at risk.</td>
+                                </tr>
+                            )}
+                            {(dashboard.atRiskStudents || []).map((student) => (
                                 <tr key={student.id} className="hover:bg-slate-50 dark:hover:bg-navy-700/50 transition-colors">
                                     <td className="px-6 py-4 text-slate-800 dark:text-white font-medium">{student.name}</td>
                                     <td className="px-6 py-4">
@@ -127,9 +133,7 @@ const Analytics = () => {
                                     </td>
                                     <td className="px-6 py-4 text-slate-500 dark:text-slate-400 text-sm">{student.lastActive}</td>
                                     <td className="px-6 py-4 text-right">
-                                        <button className="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 text-sm font-medium hover:underline">
-                                            View Profile
-                                        </button>
+                                        {/* Action buttons can go here */}
                                     </td>
                                 </tr>
                             ))}
