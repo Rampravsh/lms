@@ -33,6 +33,17 @@ exports.getCourseById = asyncHandler(async (req, res, next) => {
     res.status(200).json(new ApiResponse(200, course, 'Course fetched successfully'));
 });
 
+// @desc    Get logged in user's courses
+// @route   GET /api/courses/my-courses
+// @access  Private (Instructor/Admin)
+exports.getMyCourses = asyncHandler(async (req, res, next) => {
+    const courses = await Course.find({ instructor: req.user.id })
+        .populate('instructor', 'name avatar')
+        .sort({ createdAt: -1 });
+
+    res.status(200).json(new ApiResponse(200, courses, 'My courses fetched successfully'));
+});
+
 // @desc    Create new course
 // @route   POST /api/courses
 // @access  Private (Instructor/Admin)
@@ -52,7 +63,7 @@ exports.updateCourse = asyncHandler(async (req, res, next) => {
         throw new ApiError(404, 'Course not found');
     }
 
-    if (course.instructor.toString() !== req.user.id && req.user.role !== 'admin') {
+    if (course.instructor.toString() !== req.user.id) {
         throw new ApiError(403, 'Not authorized to update this course');
     }
 
@@ -74,7 +85,7 @@ exports.deleteCourse = asyncHandler(async (req, res, next) => {
         throw new ApiError(404, 'Course not found');
     }
 
-    if (course.instructor.toString() !== req.user.id && req.user.role !== 'admin') {
+    if (course.instructor.toString() !== req.user.id) {
         throw new ApiError(403, 'Not authorized to delete this course');
     }
 
@@ -92,7 +103,7 @@ exports.addVideo = asyncHandler(async (req, res) => {
     const course = await Course.findById(req.params.id);
     if (!course) throw new ApiError(404, 'Course not found');
 
-    if (course.instructor.toString() !== req.user.id && req.user.role !== 'admin') {
+    if (course.instructor.toString() !== req.user.id) {
         throw new ApiError(403, 'Not authorized to add videos to this course');
     }
 

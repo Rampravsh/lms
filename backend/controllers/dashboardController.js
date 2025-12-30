@@ -79,10 +79,21 @@ exports.getStudentDashboard = asyncHandler(async (req, res) => {
 // @route   GET /api/dashboard/admin
 // @access  Private (Admin)
 exports.getAdminDashboard = asyncHandler(async (req, res) => {
+    // 1. Total Global Users (Platform-wide)
     const totalUsers = await User.countDocuments({ role: 'student' });
+
+    // 2. Total Instructors (Platform-wide) - keeping this
     const totalInstructors = await User.countDocuments({ role: 'instructor' });
-    const totalCourses = await Course.countDocuments();
-    const totalEnrollments = await Progress.countDocuments();
+
+    // 3. YOUR Total Courses (Scoped)
+    const totalCourses = await Course.countDocuments({ instructor: req.user._id });
+
+    // 4. YOUR Total Enrollments (Scoped)
+    // Find all course IDs owned by this user
+    const myCourseIds = await Course.find({ instructor: req.user._id }).distinct('_id');
+
+    // Count Progress docs where course is in myCourseIds
+    const totalEnrollments = await Progress.countDocuments({ course: { $in: myCourseIds } });
 
     res.status(200).json(new ApiResponse(200, {
         totalUsers,

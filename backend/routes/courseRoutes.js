@@ -5,13 +5,17 @@ const {
     createCourse,
     updateCourse,
     deleteCourse,
-    addVideo
+    addVideo,
+    getMyCourses
 } = require('../controllers/courseController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
 
+
+
+router.get('/my-courses', protect, authorize('instructor', 'admin'), getMyCourses);
 
 router.route('/')
     .get(getAllCourses)

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { fetchCourses, deleteCourse } from '../../store/slices/courseSlice';
+import { fetchMyCourses, deleteCourse } from '../../store/slices/courseSlice';
 import { Plus, Edit, Trash2, Video, Users } from 'lucide-react';
 
 const AdminCourses = () => {
@@ -10,7 +10,7 @@ const AdminCourses = () => {
     const { courses, isLoading } = useSelector((state) => state.courses);
 
     useEffect(() => {
-        dispatch(fetchCourses());
+        dispatch(fetchMyCourses());
     }, [dispatch]);
 
     const handleDelete = async (id) => {
