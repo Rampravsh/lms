@@ -14,9 +14,9 @@ const ProgressCircle = ({ percentage, label, colorClass, grade }) => {
 
     return (
         <div className="flex flex-col items-center">
-            <div className="relative w-24 h-24 flex items-center justify-center">
+            <div className="relative w-16 h-16 md:w-24 md:h-24 flex items-center justify-center">
                 {/* Background Circle */}
-                <svg className="w-full h-full transform -rotate-90">
+                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 96 96">
                     <circle
                         cx="48"
                         cy="48"
@@ -40,25 +40,27 @@ const ProgressCircle = ({ percentage, label, colorClass, grade }) => {
                         className={clsx("transition-all duration-1000 ease-out", colorClass)}
                     />
                 </svg>
-                <span className="absolute text-xl font-bold text-slate-800 dark:text-white">{grade || `${percentage}%`}</span>
+                <span className="absolute text-sm md:text-xl font-bold text-slate-800 dark:text-white">{grade || `${percentage}%`}</span>
             </div>
-            <span className="mt-2 text-sm text-slate-500 dark:text-slate-400 font-medium">{label}</span>
+            <span className="mt-2 text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium text-center">{label}</span>
             {grade && <span className="text-xs text-mint-600 dark:text-mint-500">Excellent</span>}
         </div>
     );
 };
 
 const StatWidget = ({ icon: Icon, title, value, subtext }) => (
-    <div className="bg-white dark:bg-navy-800 p-6 rounded-2xl border border-slate-200 dark:border-navy-700/50 hover:border-mint-500/30 transition-colors group shadow-sm dark:shadow-none">
-        <div className="flex items-start justify-between mb-4">
-            <div className="p-3 bg-slate-100 dark:bg-navy-900 rounded-xl group-hover:bg-mint-500/10 transition-colors">
-                <Icon className="text-mint-600 dark:text-mint-400 group-hover:text-mint-500 dark:group-hover:text-mint-300" size={24} />
+    <div className="bg-white dark:bg-navy-800 p-4 md:p-6 rounded-2xl border border-slate-200 dark:border-navy-700/50 hover:border-mint-500/30 transition-colors group shadow-sm dark:shadow-none h-full flex flex-col justify-between">
+        <div className="flex items-start justify-between mb-3 md:mb-4">
+            <div className="p-2 md:p-3 bg-slate-100 dark:bg-navy-900 rounded-xl group-hover:bg-mint-500/10 transition-colors shrink-0">
+                <Icon className="text-mint-600 dark:text-mint-400 group-hover:text-mint-500 dark:group-hover:text-mint-300 w-5 h-5 md:w-6 md:h-6" />
             </div>
-            <MoreVertical size={16} className="text-slate-400 dark:text-navy-600 cursor-pointer hover:text-navy-900 dark:hover:text-white" />
+            <MoreVertical size={16} className="text-slate-400 dark:text-navy-600 cursor-pointer hover:text-navy-900 dark:hover:text-white shrink-0" />
         </div>
-        <h3 className="text-3xl font-bold text-slate-800 dark:text-white mb-1">{value}</h3>
-        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{title}</p>
-        <p className="text-xs text-mint-600 dark:text-mint-500 mt-2">{subtext}</p>
+        <div>
+            <h3 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-white mb-1 truncate">{value}</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium truncate">{title}</p>
+        </div>
+        <p className="text-xs text-mint-600 dark:text-mint-500 mt-2 truncate">{subtext}</p>
     </div>
 );
 
@@ -230,10 +232,10 @@ const Dashboard = () => {
 
 
 
-    const { enrolledCourses, completedCourses, totalHours, activeCourse } = dashboard || {};
+    const { enrolledCourses, completedCourses, totalHours, activeCourse, activeProgress } = dashboard || {};
 
-    // Placeholder for progress until backend provides it per course in this endpoint
-    const activeProgress = 0;
+    // Placeholder for progress logic if needed, but we now get it from backend
+    // const activeProgress = 0;
 
     return (
         <div className="space-y-8 animate-fade-in">
@@ -256,9 +258,9 @@ const Dashboard = () => {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="bg-white dark:bg-navy-800 p-6 rounded-2xl border border-slate-200 dark:border-navy-700/50 flex flex-col justify-between shadow-sm dark:shadow-none">
-                    <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-4">Overall Progress</h3>
-                    <div className="flex justify-between items-end">
+                <div className="bg-white dark:bg-navy-800 p-4 md:p-6 rounded-2xl border border-slate-200 dark:border-navy-700/50 flex flex-col justify-between shadow-sm dark:shadow-none">
+                    <h3 className="text-base md:text-lg font-semibold text-slate-800 dark:text-white mb-4">Overall Progress</h3>
+                    <div className="flex justify-between items-end gap-2">
                         <ProgressCircle percentage={activeProgress} label="Course Completion" colorClass="text-mint-500" />
                         <ProgressCircle percentage={88} label="Quiz Performance" colorClass="text-blue-500" />
                         <ProgressCircle percentage={95} grade="A-" label="Grade" colorClass="text-purple-500" />

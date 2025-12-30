@@ -10,47 +10,68 @@ const asyncHandler = require('../utils/asyncHandler');
 exports.getStudentDashboard = asyncHandler(async (req, res) => {
     const userId = req.user._id;
 
+    // --- Backfill Logic: Ensure all enrolled courses have a Progress record ---
+    // Fetch user to get enrolledCourses list
+    const user = await User.findById(userId);
+    if (user && user.enrolledCourses && user.enrolledCourses.length > 0) {
+        for (const courseId of user.enrolledCourses) {
+            const exists = await Progress.exists({ user: userId, course: courseId });
+            if (!exists) {
+                // Fetch course to get video count
+                const course = await Course.findById(courseId);
+                if (course) {
+                    await Progress.create({
+                        user: userId,
+                        course: courseId,
+                        completedVideos: [],
+                        totalLectures: course.videos.length,
+                        lecturesCompleted: 0,
+                        completionPercentage: 0,
+                        timeSpent: 0,
+                        lastAccessed: Date.now()
+                    });
+                }
+            }
+        }
+    }
+    // ------------------------------------------------------------------------
+
     // 1. Enrolled Courses Count
     const enrolledCoursesCount = await Progress.countDocuments({ user: userId });
 
-    // 2. Completed Courses Count (assuming 100% completion)
+    // 2. Completed Courses Count
     const completedCoursesCount = await Progress.countDocuments({
         user: userId,
         completionPercentage: 100
     });
 
-    // 3. Total Study Hours (This would ideally come from summing up duration of completed lessons)
-    // For now, we'll estimate or sum if we had the data easily accessible. 
-    // Let's aggregate from Progress -> Course -> Modules -> Lessons
-    // This is complex without a direct "time spent" field. 
-    // We'll return a placeholder or calculate based on completed lessons if possible.
-    // Simplified: Count completed lessons * avg duration (or 0 for now)
-    const progressDocs = await Progress.find({ user: userId }).populate({
-        path: 'completedLessons',
-        select: 'duration'
-    });
+    // 3. Total Study Hours
+    try {
+        const progressDocs = await Progress.find({ user: userId });
+        const totalMinutes = progressDocs.reduce((acc, curr) => acc + (curr.timeSpent || 0), 0);
+        var totalHours = (totalMinutes / 60).toFixed(1);
+    } catch (error) {
+        console.error("Error calculating total hours:", error);
+        var totalHours = 0;
+    }
 
-    let totalMinutes = 0;
-    progressDocs.forEach(p => {
-        p.completedLessons.forEach(l => {
-            totalMinutes += (l.duration || 0);
-        });
-    });
-    const totalHours = (totalMinutes / 60).toFixed(1);
-
-    // 4. Active Course (Most recently updated progress)
+    // 4. Active Course (Most recently accessed)
     const lastActiveProgress = await Progress.findOne({ user: userId })
-        .sort({ updatedAt: -1 })
-        .populate('course', 'title thumbnail');
+        .sort({ lastAccessed: -1 })
+        .populate('course', 'title thumbnail description');
 
     const activeCourse = lastActiveProgress ? lastActiveProgress.course : null;
+    const activeProgress = lastActiveProgress ? lastActiveProgress.completionPercentage : 0;
+
+    console.log(`[Dashboard] User ${userId}: TotalHours=${totalHours}, ActiveCourse=${activeCourse?.title}, Progress=${activeProgress}%`);
 
     res.status(200).json(new ApiResponse(200, {
         enrolledCourses: enrolledCoursesCount,
         completedCourses: completedCoursesCount,
         totalHours,
         activeCourse,
-        streak: 0 // Placeholder for streak logic
+        activeProgress,
+        streak: 0 // Placeholder
     }, 'Student dashboard data fetched'));
 });
 

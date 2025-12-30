@@ -11,10 +11,26 @@ const progressSchema = new mongoose.Schema({
         ref: 'Course',
         required: true
     },
-    completedLessons: [{
+    completedVideos: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Lesson'
+        ref: 'Video'
     }],
+    lecturesCompleted: {
+        type: Number,
+        default: 0
+    },
+    totalLectures: {
+        type: Number,
+        default: 0
+    },
+    timeSpent: {
+        type: Number, // in minutes
+        default: 0
+    },
+    lastAccessed: {
+        type: Date,
+        default: Date.now
+    },
     completionPercentage: {
         type: Number,
         default: 0

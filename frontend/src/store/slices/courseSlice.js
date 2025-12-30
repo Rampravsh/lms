@@ -86,6 +86,30 @@ export const addVideo = createAsyncThunk(
     }
 );
 
+export const enrollCourse = createAsyncThunk(
+    'courses/enroll',
+    async (courseId, { rejectWithValue }) => {
+        try {
+            const response = await api.post(`/courses/${courseId}/enroll`);
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to enroll');
+        }
+    }
+);
+
+export const markVideoCompleted = createAsyncThunk(
+    'courses/markVideoCompleted',
+    async ({ courseId, videoId }, { rejectWithValue }) => {
+        try {
+            const response = await api.post(`/courses/${courseId}/videos/${videoId}/complete`);
+            return response.data.data; // Returns updated progress
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to mark video completed');
+        }
+    }
+);
+
 const initialState = {
     dashboard: null,
     courses: [],

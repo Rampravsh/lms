@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchCourseById } from '../store/slices/courseSlice';
+import { fetchCourseById, markVideoCompleted } from '../store/slices/courseSlice';
 import { CheckCircle, Play, Lock, ExternalLink, ChevronLeft, ChevronRight, Loader } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -83,8 +83,10 @@ const CoursePlayer = () => {
     };
 
     const handleVideoComplete = () => {
-        setCompletedVideos(prev => ({ ...prev, [currentVideo._id]: true }));
-        // Dispatch action to backend to save progress here
+        if (!isVideoCompleted(currentVideo._id)) {
+            setCompletedVideos(prev => ({ ...prev, [currentVideo._id]: true }));
+            dispatch(markVideoCompleted({ courseId, videoId: currentVideo._id }));
+        }
     };
 
     const playVideo = (video) => {

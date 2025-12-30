@@ -19,6 +19,7 @@ import CourseEditor from './pages/admin/CourseEditor';
 import { useDispatch } from 'react-redux';
 import { loadUser } from './store/slices/authSlice';
 import { useEffect } from 'react';
+import InstallPrompt from './components/InstallPrompt';
 
 function App() {
   const dispatch = useDispatch();
@@ -38,6 +39,7 @@ function App() {
   return (
     <Router>
       <AuthProvider>
+        <InstallPrompt />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
