@@ -4,8 +4,10 @@ const errorHandler = (err, req, res, next) => {
     let error = { ...err };
     error.message = err.message;
 
-    // Log to console for dev
-    console.error(err);
+    // Log to console for dev (only for 500 or unknown errors)
+    if (!err.statusCode || err.statusCode === 500) {
+        console.error(err);
+    }
 
     // Mongoose bad ObjectId
     if (err.name === 'CastError') {
