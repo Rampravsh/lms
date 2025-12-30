@@ -17,9 +17,14 @@ const server = app.listen(PORT, () => {
 });
 
 // Initialize Socket.io
+let clientUrl = process.env.CLIENT_URL;
+if (clientUrl && !clientUrl.startsWith('http')) {
+    clientUrl = `https://${clientUrl}`;
+}
+
 const io = socketIo(server, {
     cors: {
-        origin: [process.env.CLIENT_URL, "http://localhost:5173", "http://127.0.0.1:5173"],
+        origin: [clientUrl, "http://localhost:5173", "http://127.0.0.1:5173"],
         credentials: true,
         methods: ["GET", "POST"]
     }

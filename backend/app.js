@@ -13,8 +13,15 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
+
+// Sanitize CLIENT_URL to ensure it has a protocol
+let clientUrl = process.env.CLIENT_URL;
+if (clientUrl && !clientUrl.startsWith('http')) {
+    clientUrl = `https://${clientUrl}`;
+}
+
 app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173', // Adjust as needed
+    origin: clientUrl || 'http://localhost:5173',
     credentials: true
 }));
 
