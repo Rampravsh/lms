@@ -20,12 +20,35 @@ const Layout = () => {
 
                 {/* Fixed Glass Header */}
                 <header className="fixed top-0 right-0 left-0 md:left-64 h-16 flex items-center justify-end px-6 z-20 backdrop-blur-md bg-white/70 dark:bg-navy-900/80 border-b border-transparent transition-colors duration-300">
-                    <Link
-                        to={user ? "/settings" : "/login"}
-                        className="p-2 rounded-full bg-slate-200/50 dark:bg-navy-700/50 text-slate-800 dark:text-white hover:bg-slate-300/50 dark:hover:bg-navy-600/50 transition-colors backdrop-blur-sm"
-                    >
-                        <SettingsIcon size={20} />
-                    </Link>
+                    {user ? (
+                        <Link
+                            to="/settings"
+                            className="flex items-center gap-3 pl-3 pr-4 py-1.5 rounded-full bg-slate-100/50 dark:bg-navy-800/50 border border-slate-200/50 dark:border-navy-700/50 hover:bg-slate-200/50 dark:hover:bg-navy-700/50 transition-all backdrop-blur-sm group"
+                        >
+                            <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-200 dark:border-navy-600 group-hover:border-mint-500 transition-colors">
+                                <img
+                                    src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`}
+                                    alt={user.name}
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                            <div className="hidden md:block text-left">
+                                <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 group-hover:text-navy-900 dark:group-hover:text-white transition-colors">
+                                    {user.name}
+                                </p>
+                                <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                                    {user.role}
+                                </p>
+                            </div>
+                        </Link>
+                    ) : (
+                        <Link
+                            to="/login"
+                            className="p-2 rounded-full bg-slate-200/50 dark:bg-navy-700/50 text-slate-800 dark:text-white hover:bg-slate-300/50 dark:hover:bg-navy-600/50 transition-colors backdrop-blur-sm"
+                        >
+                            <SettingsIcon size={20} />
+                        </Link>
+                    )}
                 </header>
 
                 {/* Scrollable Content Area */}

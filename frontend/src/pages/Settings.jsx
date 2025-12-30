@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { User, Bell, Lock, Moon, Sun, Mail, Save, Shield, LogOut, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { logoutUser, setUser } from '../store/slices/authSlice'; // Assuming setUser exists or I can just re-structure
+import { logoutUser, setUser } from '../store/slices/authSlice';
 import ThemeToggle from '../components/common/ThemeToggle';
-import axios from 'axios';
+import api from '../api/axios';
 
 const SettingsSection = ({ title, icon: Icon, children }) => (
     <div className="bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-navy-700">
@@ -47,12 +47,7 @@ const Settings = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const token = localStorage.getItem('token');
-                if (!token) return;
-
-                const response = await axios.get('http://localhost:8000/api/auth/me', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const response = await api.get('/auth/me');
 
                 if (response.data.success) {
                     const u = response.data.data;
@@ -106,14 +101,11 @@ const Settings = () => {
         setIsLoading(true);
         setSuccessMessage('');
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.put('http://localhost:8000/api/auth/profile', {
+            const response = await api.put('/auth/profile', {
                 name: formData.name,
                 bio: formData.bio,
                 avatar: formData.avatar,
                 notifications: formData.notifications
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
             });
 
             if (response.data.success) {
@@ -140,12 +132,9 @@ const Settings = () => {
         }
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.put('http://localhost:8000/api/auth/password', {
+            const response = await api.put('/auth/password', {
                 currentPassword: passwordData.currentPassword,
                 newPassword: passwordData.newPassword
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
             });
 
             if (response.data.success) {
