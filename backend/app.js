@@ -22,6 +22,7 @@ app.use(cors({
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });
+
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/dashboard', dashboardRoutes);

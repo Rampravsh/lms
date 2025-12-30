@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://10.72.230.72:8000/api', // Adjust if your backend runs on a different port
+    // Dynamically set base URL to support both localhost and network IP (mobile)
+    baseURL: `http://${window.location.hostname}:8000/api`,
     withCredentials: true, // Send cookies with requests
     headers: {
         'Content-Type': 'application/json',

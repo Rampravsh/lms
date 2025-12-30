@@ -26,8 +26,9 @@ const Messages = () => {
             if (!user) return;
             try {
                 const token = localStorage.getItem('token');
-                // Use the correct API URL (adjust port if needed, assuming backend on 8000)
-                const response = await fetch('http://localhost:8000/api/auth/users', {
+                // Use dynamic hostname to support mobile/network access
+                const baseUrl = `http://${window.location.hostname}:8000`;
+                const response = await fetch(`${baseUrl}/api/auth/users`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -47,7 +48,9 @@ const Messages = () => {
     useEffect(() => {
         if (!user) return;
 
-        const newSocket = io('http://localhost:8000'); // Ensure this matches backend port
+        // Use dynamic hostname to match how the page was loaded (localhost or IP)
+        const socketUrl = `http://${window.location.hostname}:8000`;
+        const newSocket = io(socketUrl);
         setSocket(newSocket);
 
         newSocket.emit('join', user._id || user.id);

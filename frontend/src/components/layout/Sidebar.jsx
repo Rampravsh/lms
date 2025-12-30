@@ -18,7 +18,7 @@ const Sidebar = () => {
     const navItems = [
         { icon: LayoutDashboard, label: 'Dashboard', path: '/', hideForRoles: ['admin'] },
         { icon: TrendingUp, label: 'Analytics', path: '/analytics', roles: ['admin'] },
-        { icon: BookOpen, label: 'Courses', path: '/courses' },
+        { icon: BookOpen, label: 'Courses', path: '/courses', hideForRoles: ['admin'] },
         { icon: Video, label: 'Manage Courses', path: '/admin/courses', roles: ['admin', 'instructor'] },
         { icon: Calendar, label: 'Calendar', path: '/calendar', protected: true },
         { icon: MessageSquare, label: 'Messages', path: '/messages', protected: true },

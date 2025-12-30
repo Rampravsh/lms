@@ -35,7 +35,8 @@ const AdminCourses = () => {
                 </button>
             </div>
 
-            <div className="bg-white dark:bg-navy-800 rounded-2xl shadow-sm border border-slate-200 dark:border-navy-700 overflow-hidden">
+            {/* Desktop Table View */}
+            <div className="hidden md:block bg-white dark:bg-navy-800 rounded-2xl shadow-sm border border-slate-200 dark:border-navy-700 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
@@ -78,7 +79,7 @@ const AdminCourses = () => {
                                     </td>
                                     <td className="px-6 py-4 text-slate-600 dark:text-slate-300 text-sm">
                                         <div className="flex items-center gap-4">
-                                            <div className="flex items-center gap-1.5" title="Modules">
+                                            <div className="flex items-center gap-1.5" title="Videos">
                                                 <Video size={16} className="text-slate-400" />
                                                 <span>{course.videos?.length || 0}</span>
                                             </div>
@@ -108,17 +109,73 @@ const AdminCourses = () => {
                                     </td>
                                 </tr>
                             ))}
-                            {courses.length === 0 && !isLoading && (
-                                <tr>
-                                    <td colSpan="5" className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
-                                        No courses found. Create your first course to get started.
-                                    </td>
-                                </tr>
-                            )}
                         </tbody>
                     </table>
                 </div>
             </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4">
+                {courses.map((course) => (
+                    <div key={course.id || course._id} className="bg-white dark:bg-navy-800 rounded-2xl shadow-sm border border-slate-200 dark:border-navy-700 overflow-hidden">
+                        <div className="relative h-40 bg-slate-200 dark:bg-navy-900">
+                            <img
+                                src={course.thumbnail || '/placeholder.png'}
+                                alt="thumbnail"
+                                className="w-full h-full object-cover"
+                            />
+                            <div className="absolute top-2 right-2">
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold shadow-sm ${course.isPublished
+                                    ? 'bg-green-100 text-green-700'
+                                    : 'bg-yellow-100 text-yellow-700'
+                                    }`}>
+                                    {course.isPublished ? 'Published' : 'Draft'}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="p-4">
+                            <div className="mb-2">
+                                <span className="text-xs text-mint-600 dark:text-mint-400 font-bold uppercase tracking-wider">{course.category}</span>
+                                <h3 className="text-lg font-bold text-navy-900 dark:text-white leading-tight mt-1">{course.title}</h3>
+                            </div>
+
+                            <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400 mb-4">
+                                <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-1.5">
+                                        <Video size={16} />
+                                        <span>{course.videos?.length || 0}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <Users size={16} />
+                                        <span>{course.studentsEnrolled?.length || 0}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 pt-4 border-t border-slate-100 dark:border-navy-700">
+                                <button
+                                    onClick={() => navigate(`/admin/courses/${course.id || course._id}/edit`)}
+                                    className="flex-1 py-2 bg-slate-100 dark:bg-navy-700 text-slate-700 dark:text-slate-300 rounded-lg font-semibold text-sm hover:bg-slate-200 dark:hover:bg-navy-600 transition-colors"
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(course.id || course._id)}
+                                    className="p-2 text-red-500 bg-red-50 dark:bg-red-500/10 rounded-lg hover:bg-red-100 transition-colors"
+                                >
+                                    <Trash2 size={20} />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {courses.length === 0 && !isLoading && (
+                <div className="text-center py-12 text-slate-500 dark:text-slate-400 bg-white dark:bg-navy-800 rounded-2xl border border-slate-200 dark:border-navy-700">
+                    No courses found. Create your first course to get started.
+                </div>
+            )}
         </div>
     );
 };

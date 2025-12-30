@@ -1,18 +1,41 @@
 import React from 'react';
-import { useAuth } from '../../context/AuthContext';
+import { useSelector } from 'react-redux';
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, TrendingUp, BookOpen, Calendar, MessageSquare } from 'lucide-react';
 import clsx from 'clsx';
 
 const MobileNav = () => {
-    const { user } = useAuth();
+    const { user } = useSelector((state) => state.auth);
 
     const navItems = [
-        { icon: LayoutDashboard, label: 'Home', path: '/', hideForRoles: ['admin'] },
-        { icon: TrendingUp, label: 'Analysis', path: '/analytics', roles: ['admin'] },
-        { icon: BookOpen, label: 'Courses', path: '/courses' },
-        { icon: Calendar, label: 'Calendar', path: '/calendar' },
-        { icon: MessageSquare, label: 'Messages', path: '/messages' },
+        {
+            icon: LayoutDashboard,
+            label: 'Home',
+            path: '/',
+            roles: ['student']
+            // hideForRoles: ['admin'] // Admin now has a Dashboard view, so we don't hide it
+        },
+        {
+            icon: TrendingUp,
+            label: 'Analysis',
+            path: '/analytics',
+            roles: ['admin']
+        },
+        {
+            icon: BookOpen,
+            label: user?.role === 'admin' ? 'Manage' : 'Courses',
+            path: user?.role === 'admin' ? '/admin/courses' : '/courses'
+        },
+        {
+            icon: Calendar,
+            label: 'Calendar',
+            path: '/calendar'
+        },
+        {
+            icon: MessageSquare,
+            label: 'Messages',
+            path: '/messages'
+        },
     ];
 
     return (

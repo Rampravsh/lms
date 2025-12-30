@@ -228,7 +228,9 @@ const Dashboard = () => {
         return <div className="p-8 text-center text-slate-500">Loading dashboard...</div>;
     }
 
-    const { enrolledCourses, completedCourses, totalHours, activeCourse } = dashboard;
+
+
+    const { enrolledCourses, completedCourses, totalHours, activeCourse } = dashboard || {};
 
     // Placeholder for progress until backend provides it per course in this endpoint
     const activeProgress = 0;
