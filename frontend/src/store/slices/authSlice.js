@@ -136,8 +136,15 @@ const authSlice = createSlice({
                 state.isLoading = true;
                 state.error = null;
             })
-            .addCase(registerUser.fulfilled, (state) => {
+            .addCase(registerUser.fulfilled, (state, action) => {
                 state.isLoading = false;
+                // If backend returned a token (auto-login), update state
+                if (action.payload && action.payload.token) {
+                    state.isAuthenticated = true;
+                    state.user = action.payload;
+                    state.token = action.payload.token;
+                    localStorage.setItem('token', action.payload.token);
+                }
             })
             .addCase(registerUser.rejected, (state, action) => {
                 state.isLoading = false;

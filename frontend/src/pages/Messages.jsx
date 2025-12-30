@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { Search, Send, Phone, Video, MoreVertical, User, MessageSquare } from 'lucide-react';
 import io from 'socket.io-client';
 import clsx from 'clsx';
+import api from '../api/axios';
 
 const Messages = () => {
     const { user } = useSelector((state) => state.auth);
@@ -25,17 +26,9 @@ const Messages = () => {
         const fetchUsers = async () => {
             if (!user) return;
             try {
-                const token = localStorage.getItem('token');
-                // Use dynamic hostname to support mobile/network access
-                const baseUrl = `http://${window.location.hostname}:8000`;
-                const response = await fetch(`${baseUrl}/api/auth/users`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    setContacts(data.data);
+                const response = await api.get('/auth/users');
+                if (response.data.success) {
+                    setContacts(response.data.data);
                 }
             } catch (error) {
                 console.error("Failed to fetch contacts", error);
@@ -48,8 +41,8 @@ const Messages = () => {
     useEffect(() => {
         if (!user) return;
 
-        // Use dynamic hostname to match how the page was loaded (localhost or IP)
-        const socketUrl = `http://${window.location.hostname}:8000`;
+        // Use environment variable for production, or dynamic hostname for local
+        const socketUrl = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:8000`;
         const newSocket = io(socketUrl);
         setSocket(newSocket);
 

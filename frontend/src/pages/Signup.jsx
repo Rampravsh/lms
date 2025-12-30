@@ -20,7 +20,12 @@ const Signup = () => {
         e.preventDefault();
         const resultAction = await dispatch(registerUser({ name, email, password, role }));
         if (registerUser.fulfilled.match(resultAction)) {
-            navigate('/verify-otp', { state: { email } });
+            // Check if we got a token back (auto-login triggered)
+            if (resultAction.payload && resultAction.payload.token) {
+                navigate('/');
+            } else {
+                navigate('/verify-otp', { state: { email } });
+            }
         }
     };
 

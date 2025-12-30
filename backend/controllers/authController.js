@@ -57,6 +57,24 @@ exports.register = asyncHandler(async (req, res, next) => {
         // Fallback: If email fails (e.g. Render blocking SMTP), auto-verify user so they can login
         user.isVerified = true;
         await user.save();
+
+        // Generate Token & Auto-Login
+        const token = generateToken(user._id);
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+        });
+
+        return res.status(200).json(
+            new ApiResponse(200, {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                token
+            }, 'User registered and logged in (Email failed).')
+        );
     }
 
     res.status(201).json(
